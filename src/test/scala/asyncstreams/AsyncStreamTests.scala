@@ -28,7 +28,7 @@ class AsyncStreamTests extends BaseSuite {
     val s1 = makeStream(0 :: 1 :: Nil)
     val s2 = makeStream(2 :: 3 :: Nil)
     val f = concat(s1, s2)
-    wait(f.toList) shouldBe List(0, 1, 2, 3)
+    wait(f.to[List]) shouldBe List(0, 1, 2, 3)
   }
 
   test("working as monad") {
@@ -40,21 +40,21 @@ class AsyncStreamTests extends BaseSuite {
       v2 <- s2
     } yield v1 * v2
 
-    wait(res.toList) shouldBe List(0, 0, 2, 3)
+    wait(res.to[List]) shouldBe List(0, 0, 2, 3)
   }
 
   test("takeWhile") {
     val r = makeInfStream.takeWhile(_ < 4)
-    wait(r.toList) shouldBe List(0, 1, 2, 3)
+    wait(r.to[List]) shouldBe List(0, 1, 2, 3)
   }
 
   test("take") {
     val r = makeInfStream.take(3)
-    wait(r.toList) shouldBe List(0, 1, 2)
+    wait(r.to[List]) shouldBe List(0, 1, 2)
   }
 
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
-    wait(r.toList) shouldBe (0 to 999999)
+    wait(r.to[List]) shouldBe (0 to 999999)
   }
 }

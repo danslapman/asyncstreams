@@ -1,6 +1,9 @@
 package asyncstreams
 
+import scala.collection.generic.CanBuildFrom
+import scala.annotation.unchecked.{ uncheckedVariance => uV }
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.higherKinds
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.syntax.monad._
@@ -16,8 +19,8 @@ case class AsyncStream[A](data: Future[Chunk[A, AsyncStream[A]]]) {
     impl(data, Future(start))
   }
 
-  def toList(implicit executor: ExecutionContext): Future[List[A]] =
-    foldLeft[List[A]](Nil)((list, el) => el :: list) map (_.reverse)
+  def to[Col[_]](implicit executor: ExecutionContext, cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Future[Col[A]] =
+    foldLeft(cbf())((col, el) => col += el).map(_.result())
 
   def takeWhile(p: A => Boolean)(implicit executor: ExecutionContext): AsyncStream[A] =
     new AsyncStream[A](data map {
