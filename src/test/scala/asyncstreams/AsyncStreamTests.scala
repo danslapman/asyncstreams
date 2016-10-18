@@ -6,15 +6,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import asyncstreams.AsyncStream._
 
 import scalaz.std.scalaFuture._
-import scalaz.syntax.std.option._
 import scalaz.syntax.monad._
 import scalaz.syntax.std.boolean._
 
 
 class AsyncStreamTests extends BaseSuite {
-  private def makeStream(l: List[Int]) = generate(l)(l => l.nonEmpty.option((l.tail, l.head)).point[Future])
+  private def makeStream(l: List[Int]) = generate(l)(l => ((l.nonEmpty)?(l.head, l.tail)|END).point[Future])
 
-  private def makeInfStream = generate(0)(v => Future((v + 1, v).some))
+  private def makeInfStream = generate(0)(v => Future((v, v + 1)))
 
   private def wait[T](f: Future[T]): T = Await.result(f, 10.seconds)
 
