@@ -4,8 +4,6 @@ import scala.annotation.unchecked.{uncheckedVariance => uV}
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
-import scalaz.std.scalaFuture._
-import scalaz.syntax.monad._
 
 case class AsyncStream[A](data: Future[Pair[A, AsyncStream[A]]]) {
   import AsyncStream._
@@ -44,7 +42,7 @@ case class AsyncStream[A](data: Future[Pair[A, AsyncStream[A]]]) {
 object AsyncStream {
   def nil[A](implicit executor: ExecutionContext): AsyncStream[A] = AsyncStream(ENDF)
   def single[A](item: A)(implicit executor: ExecutionContext): AsyncStream[A] =
-    AsyncStream(Pair(item, nil[A]).point[Future])
+    AsyncStream(Future(Pair(item, nil[A])))
 
   def generate[S, A](start: S)(gen: S => Future[(A, S)])(implicit executor: ExecutionContext): AsyncStream[A] =
     AsyncStream(gen(start).map {
@@ -55,7 +53,7 @@ object AsyncStream {
   def concat[A](s1: AsyncStream[A], s2: AsyncStream[A])(implicit executor: ExecutionContext): AsyncStream[A] =
     new AsyncStream[A](s1.data.flatMap {
       case null => s2.data
-      case p => Pair(p.first, concat(p.second, s2)).point[Future]
+      case p => Future(Pair(p.first, concat(p.second, s2)))
     })
 }
 
