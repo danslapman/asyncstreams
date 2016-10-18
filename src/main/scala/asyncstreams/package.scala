@@ -7,4 +7,8 @@ package object asyncstreams {
 
   implicit def asyncStreamInstance(implicit executor: ExecutionContext): Monad[AsyncStream] =
     new AsyncStreamMonad
+
+  def fStateInstance[S](implicit executor: ExecutionContext) = new FStateMonad[S]
+
+  object monadops extends FStateMonadFunctions
 }
