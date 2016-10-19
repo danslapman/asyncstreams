@@ -17,3 +17,5 @@ wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
 ```
 
 See more examples in tests.
+
+asyncstreams is based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
