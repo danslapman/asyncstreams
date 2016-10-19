@@ -18,4 +18,12 @@ wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
 
 See more examples in tests.
 
+asyncstreams is available via jitpack:
+
+```
+    resolvers += "jitpack" at "https://jitpack.io"
+
+    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.1"
+```
+
 asyncstreams is based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
