@@ -2,7 +2,7 @@ package asyncstreams
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FState[S, A](func: S => Future[(A, S)]) extends ((S) => Future[(A, S)]) {
+class FState[S, A](val func: S => Future[(A, S)]) extends ((S) => Future[(A, S)]) {
   def apply(s: S) = func(s)
 
   def flatMap[B](f: A => FState[S, B])(implicit ex: ExecutionContext): FState[S, B] = FState[S, B](

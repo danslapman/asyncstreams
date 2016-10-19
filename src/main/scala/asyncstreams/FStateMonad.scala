@@ -13,7 +13,7 @@ class FStateMonad[S](implicit ex: ExecutionContext)
 
   override def bind[A, B](m: F[A])(f: A => F[B]): F[B] =
     FState((s: S) => m(s) flatMap {
-      case null => ENDF
+      case END => ENDF
       case (fst, snd) => f(fst)(snd)
     })
 
@@ -31,12 +31,14 @@ trait FStateMonadFunctions {
   def gets[S](implicit ex: ExecutionContext): FState[S, S] = FState((s: S) => Future((s, s)))
   def puts[S](news: S)(implicit ex: ExecutionContext): FState[S, S] = FState((_: S) => Future((news, news)))
 
-  def conds[S](f: S => Boolean)(implicit m: FStateMonad[S]): FState[S, Boolean] =
+  def conds[S](f: S => Boolean)(implicit m: FStateMonad[S]): FStateMonad[S]#F[Boolean] =
     m.conds(f)
 
-  def fconds[S](f: S => FState[S, Boolean])(implicit m: FStateMonad[S]): FState[S, Boolean] =
+  /*
+  def fconds[S](f: S => FState[S, Boolean])(implicit m: FStateMonad[S]): FStateMonad[S]#F[Boolean] =
     m.fconds(f)
+    */
 
-  def mods[S : FStateMonad](f: S => S)(implicit m: FStateMonad[S]): FState[S, S] =
+  def mods[S : FStateMonad](f: S => S)(implicit m: FStateMonad[S]): FStateMonad[S]#F[S] =
     m.mods(f)
 }

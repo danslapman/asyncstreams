@@ -11,7 +11,7 @@ case class AsyncStream[A](data: Future[Pair[A, AsyncStream[A]]]) {
   def foldLeft[B](start: B)(f: (B, A) => B)(implicit executor: ExecutionContext): Future[B] = {
     def impl(d: Future[Pair[A, AsyncStream[A]]], acc: Future[B]): Future[B] =
       d.flatMap {
-        case null => acc
+        case END => acc
         case pair => impl(pair.second.data, acc map (b => f(b, pair.first)))
       }
 
@@ -24,7 +24,7 @@ case class AsyncStream[A](data: Future[Pair[A, AsyncStream[A]]]) {
 
   def takeWhile(p: A => Boolean)(implicit executor: ExecutionContext): AsyncStream[A] =
     new AsyncStream[A](data map {
-      case null => END
+      case END => END
       case pair if !p(pair.first) => END
       case pair => Pair(pair.first, pair.second.takeWhile(p))
     })
@@ -33,7 +33,7 @@ case class AsyncStream[A](data: Future[Pair[A, AsyncStream[A]]]) {
   def take(n: Int)(implicit executor: ExecutionContext): AsyncStream[A] =
     if (n <= 0) nil
     else AsyncStream(data.map {
-      case null => END
+      case END => END
       case p => Pair(p.first, p.second.take(n - 1))
     })
 }
@@ -46,13 +46,13 @@ object AsyncStream {
 
   def generate[S, A](start: S)(gen: S => Future[(A, S)])(implicit executor: ExecutionContext): AsyncStream[A] =
     AsyncStream(gen(start).map {
-      case null => END
+      case END => END
       case (el, rest) => Pair(el, generate(rest)(gen))
     })
 
   def concat[A](s1: AsyncStream[A], s2: AsyncStream[A])(implicit executor: ExecutionContext): AsyncStream[A] =
     new AsyncStream[A](s1.data.flatMap {
-      case null => s2.data
+      case END => s2.data
       case p => Future(Pair(p.first, concat(p.second, s2)))
     })
 }
