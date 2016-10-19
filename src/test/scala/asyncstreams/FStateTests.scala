@@ -24,11 +24,11 @@ class FStateTests extends BaseSuite {
     val fsm = fStateInstance[Int]
 
     val t = for {
-      _ <- fsm.whileM_(gets[Int] map (_ < 10), for {
-        i <- gets[Int]
-        _ <- puts(i + 1)
-      } yield (()))
-      v1 <- gets[Int]
+      _ <- fsm.whileM_(getS[Int] map (_ < 10), for {
+        i <- getS[Int]
+        _ <- putS(i + 1)
+      } yield ())
+      v1 <- getS[Int]
     } yield v1
 
     wait(t(0)) shouldBe (10, 10)
@@ -36,10 +36,11 @@ class FStateTests extends BaseSuite {
 
   test("conds & mods") {
     implicit val fsm = fStateInstance[Int]
+    import fsm.whileM_
 
     val t = for {
-      _ <- fsm.whileM_(conds(_ < 10), mods(_ + 1))
-      v1 <- gets[Int]
+      _ <- whileM_(condS(_ < 10), modS(_ + 1))
+      v1 <- getS[Int]
     } yield v1
 
     wait(t(0)) shouldBe (10, 10)
@@ -52,7 +53,7 @@ class FStateTests extends BaseSuite {
       _ <- fsm.forM_(_ < 10, _ + 1) {
         fsm.point("AAAAAA")
       }
-      v1 <- gets[Int]
+      v1 <- getS[Int]
     } yield v1
 
     wait(t(0)) shouldBe (10, 10)
