@@ -5,6 +5,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import asyncstreams.AsyncStream._
 
+import scala.collection.mutable.ArrayBuffer
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.syntax.std.boolean._
@@ -55,5 +56,21 @@ class AsyncStreamTests extends BaseSuite {
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
     wait(r.to[List]) shouldBe (0 to 999999)
+  }
+
+  test("foreach") {
+    val stream = makeInfStream.take(10)
+    val buffer = ArrayBuffer[Int]()
+    val task = stream.foreach(i => buffer += i)
+    Await.ready(task, 10.seconds)
+    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+  }
+
+  test("foreachF") {
+    val stream = makeInfStream.take(10)
+    val buffer = ArrayBuffer[Int]()
+    val task = stream.foreachF(i => Future(buffer += i))
+    Await.ready(task, 10.seconds)
+    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 }
