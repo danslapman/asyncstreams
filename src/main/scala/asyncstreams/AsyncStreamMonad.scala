@@ -16,8 +16,8 @@ class AsyncStreamMonad(implicit executor: ExecutionContext) extends MonadPlus[As
     AsyncStream(
       ma.data.flatMap {
         case END => ENDF
-        case pair => f(pair.first).data.map { pair2 =>
-          Pair(pair2.first, concat(pair2.second, bind(pair.second)(f)))
+        case step => f(step.value).data.map { step2 =>
+          Step(step2.value, concat(step2.rest, bind(step.rest)(f)))
         }
       }
     )
@@ -32,19 +32,19 @@ trait AsyncStreamMonadFunctions {
     })
 
   def isEmpty[A, S](stream: AsyncStream[A])(implicit ex: ExecutionContext): FState[S, Boolean] =
-    FState(s => stream.data.map(pair => (pair eq END, s)))
+    FState(s => stream.data.map(step => (step eq END, s)))
 
   def isEmpty[A, S : FStateMonad](f: S => AsyncStream[A])(implicit fsm: FStateMonad[S], ex: ExecutionContext): FState[S, Boolean] =
     fsm.fcondS((s: S) => isEmpty(f(s)))
 
   def notEmpty[A, S](stream: AsyncStream[A])(implicit ex: ExecutionContext): FState[S, Boolean] =
-    FState(s => stream.data map (pair => (!(pair eq END), s)))
+    FState(s => stream.data map (step => (!(step eq END), s)))
 
   def notEmpty[A, S](f: S => AsyncStream[A])(implicit fsm: FStateMonad[S], ex: ExecutionContext): FState[S, Boolean] =
     fsm.fcondS(s => notEmpty(f(s)))
 
   def get[A, S](stream: AsyncStream[A])(implicit ex: ExecutionContext): FState[S, (A, AsyncStream[A])] =
-    FState(s => stream.data.map(pair => ((pair.first, pair.second), s)))
+    FState(s => stream.data.map(step => ((step.value, step.rest), s)))
 
   def generateS[S,A](start: S)(gen: FState[S, A])(implicit ex: ExecutionContext) =
     AsyncStream.generate(start)(gen.func)
