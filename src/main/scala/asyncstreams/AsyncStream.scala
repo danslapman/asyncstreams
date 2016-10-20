@@ -1,6 +1,7 @@
 package asyncstreams
 
 import scala.annotation.unchecked.{uncheckedVariance => uV}
+import scala.collection.GenIterable
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
@@ -42,6 +43,16 @@ case class AsyncStream[A](data: Future[Pair[A, AsyncStream[A]]]) {
 
   def foreachF[U](f: (A) => Future[U])(implicit executor: ExecutionContext): Future[Unit] =
     foldLeft(Future(()))((fu: Future[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(u => u)
+
+  def flatten[B](implicit asIterable: A => GenIterable[B], executor: ExecutionContext): AsyncStream[B] = {
+    val streamChunk = (p: Pair[A, AsyncStream[A]]) =>
+      concat(generate(asIterable(p.first))(it => if (it.nonEmpty) Future(it.head, it.tail) else ENDF), p.second.flatten)
+
+    AsyncStream(data.flatMap {
+      case END => ENDF
+      case pair => streamChunk(pair).data
+    })
+  }
 }
 
 

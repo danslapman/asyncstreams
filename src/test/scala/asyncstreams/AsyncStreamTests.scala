@@ -12,7 +12,7 @@ import scalaz.syntax.std.boolean._
 
 
 class AsyncStreamTests extends BaseSuite {
-  private def makeStream(l: List[Int]) = generate(l)(l => ((l.nonEmpty)?(l.head, l.tail)|END).point[Future])
+  private def makeStream[T](l: Iterable[T]) = generate(l)(l => (l.nonEmpty ?(l.head, l.tail)|END).point[Future])
 
   private def makeInfStream = generate(0)(v => Future((v, v + 1)))
 
@@ -72,5 +72,11 @@ class AsyncStreamTests extends BaseSuite {
     val task = stream.foreachF(i => Future(buffer += i))
     Await.ready(task, 10.seconds)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+  }
+
+  test("flatten") {
+    val stream = makeStream(Vector.range(0, 1000000).grouped(10).to[Vector])
+    val flatStream = stream.flatten
+    wait(flatStream.to[Vector]) shouldBe Vector.range(0, 1000000)
   }
 }
