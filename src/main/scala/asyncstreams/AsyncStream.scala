@@ -42,7 +42,7 @@ case class AsyncStream[A](data: Future[Step[A, AsyncStream[A]]]) {
     foldLeft(())((_: Unit, a: A) => {f(a); ()})
 
   def foreachF[U](f: (A) => Future[U])(implicit executor: ExecutionContext): Future[Unit] =
-    foldLeft(Future(()))((fu: Future[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(u => u)
+    foldLeft(Future(()))((fu: Future[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(identity)
 
   def flatten[B](implicit asIterable: A => GenIterable[B], executor: ExecutionContext): AsyncStream[B] = {
     val streamChunk = (p: Step[A, AsyncStream[A]]) =>

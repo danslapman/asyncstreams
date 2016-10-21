@@ -28,7 +28,7 @@ trait AsyncStreamMonadFunctions {
     (implicit ex: ExecutionContext): FState[S, Unit] =
     FState(s => {
       stream.foldLeft(Future(s))((futureS, a) => futureS.flatMap(s2 => f(a)(s2).map(_._2)))
-        .flatMap(f => f).map(((), _))
+        .flatMap(identity).map(((), _))
     })
 
   def isEmpty[A, S](stream: AsyncStream[A])(implicit ex: ExecutionContext): FState[S, Boolean] =
