@@ -4,7 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scalaz.MonadPlus
 
 class FStateMonad[S](implicit ex: ExecutionContext)
-  extends MonadPlus[({ type f[X] = FState[S, X]})#f] with FStateMonadFunctions {
+  extends MonadPlus[FState[S, ?]] with FStateMonadFunctions {
   type F[X] = FState[S, X]
 
   override def empty[A]: F[A] = FState.empty[S, A]
