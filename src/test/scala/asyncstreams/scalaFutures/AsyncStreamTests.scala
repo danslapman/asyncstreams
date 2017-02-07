@@ -1,15 +1,16 @@
-package asyncstreams
+package asyncstreams.scalaFutures
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import asyncstreams._
 import asyncstreams.AsyncStream._
+import asyncstreams.BaseSuite
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.syntax.std.boolean._
-
 
 class AsyncStreamTests extends BaseSuite {
   private def makeStream[T](l: Iterable[T]) = generate(l)(l => (l.nonEmpty ?(l.head, l.tail)|END).point[Future])

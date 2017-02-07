@@ -1,8 +1,8 @@
 package asyncstreams
 
 class Step[A, B](fp: A, sp: => B) {
-  val value = fp
-  lazy val rest = sp
+  val value: A = fp
+  lazy val rest: B = sp
 }
 
 object Step {
