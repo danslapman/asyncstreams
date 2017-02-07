@@ -46,6 +46,6 @@ class AsyncStreamMonadFunctions[F[+_]: Monad] {
   def get[A, S](stream: AsyncStream[F, A]): FState[F, S, (A, AsyncStream[F, A])] =
     FState(s => stream.data.map(step => ((step.value, step.rest), s)))
 
-  def generateS[S, A](start: S)(gen: FState[F, S, A]) =
+  def generateS[S, A](start: S)(gen: FState[F, S, A]): AsyncStream[F, A] =
     AsyncStream.generate(start)(gen.func)
 }

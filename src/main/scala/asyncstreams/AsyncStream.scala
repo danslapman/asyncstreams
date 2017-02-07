@@ -56,7 +56,6 @@ case class AsyncStream[F[+_]: Monad, A](data: F[Step[A, AsyncStream[F, A]]]) {
   }
 }
 
-
 object AsyncStream {
   def nil[F[+_]: Monad, A]: AsyncStream[F, A] = AsyncStream(ENDF[F])
   def single[F[+_]: Monad, A](item: A): AsyncStream[F, A] =
