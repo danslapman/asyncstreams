@@ -1,19 +1,26 @@
-package asyncstreams
+package asyncstreams.scalaFutures
 
-import monadops._
-import AsyncStream._
+import asyncstreams.AsyncStream.generate
+import asyncstreams.{streamOps, fStateOps}
+import asyncstreams.{AsyncStream, BaseSuite, ENDF, fStateInstance}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scalaz.std.scalaFuture._
 
 class AsyncStreamMonadicOperationsTests extends BaseSuite {
-  def makeStream(l: List[Int]) = generate(l)(l => if (l.isEmpty) ENDF else Future((l.head, l.tail)))
+  private val so = streamOps[Future]
+  import so._
+  private val fso = fStateOps[Future]
+  import fso._
+
+  def makeStream(l: List[Int]) = generate(l)(l => if (l.isEmpty) ENDF[Future] else Future((l.head, l.tail)))
 
   private def wait[T](f: Future[T]): T = Await.result(f, 10.seconds)
 
   test("foreach") {
-    implicit val fsm = fStateInstance[Int]
+    implicit val fsm = fStateInstance[Future, Int]
 
     val fstate = for {
       _ <- foreach(makeStream(0 :: 1 :: 2 :: Nil)) {
@@ -26,8 +33,8 @@ class AsyncStreamMonadicOperationsTests extends BaseSuite {
   }
 
   test("get, isEmpty") {
-    case class State(counter: Int, stream: AsyncStream[Int])
-    implicit val fsm = fStateInstance[State]
+    case class State(counter: Int, stream: AsyncStream[Future, Int])
+    implicit val fsm = fStateInstance[Future, State]
 
     val stream = makeStream(0 :: 1 :: 2 :: 3 :: Nil)
 
@@ -44,7 +51,7 @@ class AsyncStreamMonadicOperationsTests extends BaseSuite {
   }
 
   test("FState as generator") {
-    implicit val fsm = fStateInstance[Int]
+    implicit val fsm = fStateInstance[Future, Int]
 
     val stream = generateS(0) {
       for {
@@ -57,7 +64,7 @@ class AsyncStreamMonadicOperationsTests extends BaseSuite {
   }
 
   test("Generate finite stream") {
-    implicit val fsm = fStateInstance[Int]
+    implicit val fsm = fStateInstance[Future, Int]
 
     val stream = generateS(0) {
       for {
