@@ -9,5 +9,7 @@ package object asyncstreams {
 
   def fStateInstance[F[+_]: Monad, S] = new FStateMonad[F, S]
 
-  object monadops extends FStateMonadFunctions with AsyncStreamMonadFunctions
+  def fStateOps[F[+_]: Monad] = new FStateMonadFunctions[F]
+
+  def streamOps[F[+_]: Monad] = new AsyncStreamMonadFunctions[F]
 }

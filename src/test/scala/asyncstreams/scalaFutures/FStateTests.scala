@@ -1,6 +1,6 @@
 package asyncstreams.scalaFutures
 
-import asyncstreams.monadops.{condS, getS, modS, putS}
+import asyncstreams.{streamOps, fStateOps}
 import asyncstreams.{BaseSuite, fStateInstance}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,6 +9,11 @@ import scala.concurrent.{Await, Future}
 import scalaz.std.scalaFuture._
 
 class FStateTests extends BaseSuite {
+  private val so = streamOps[Future]
+  import so._
+  private val fso = fStateOps[Future]
+  import fso._
+
   private def wait[T](f: Future[T]): T = Await.result(f, 10.seconds)
 
   test("FState in for-comprehensions") {
@@ -26,11 +31,11 @@ class FStateTests extends BaseSuite {
     val fsm = fStateInstance[Future, Int]
 
     val t = for {
-      _ <- fsm.whileM_(getS[Future, Int] map (_ < 10), for {
-        i <- getS[Future, Int]
+      _ <- fsm.whileM_(getS[Int] map (_ < 10), for {
+        i <- getS[Int]
         _ <- putS(i + 1)
       } yield ())
-      v1 <- getS[Future, Int]
+      v1 <- getS[Int]
     } yield v1
 
     wait(t(0)) shouldBe (10, 10)
@@ -41,7 +46,7 @@ class FStateTests extends BaseSuite {
 
     val t = for {
       _ <- fsm.whileM_(condS(_ < 10), modS(_ + 1))
-      v1 <- getS[Future, Int]
+      v1 <- getS[Int]
     } yield v1
 
     wait(t(0)) shouldBe (10, 10)
@@ -54,7 +59,7 @@ class FStateTests extends BaseSuite {
       _ <- fsm.forM_(_ < 10, _ + 1) {
         fsm.point("AAAAAA")
       }
-      v1 <- getS[Future, Int]
+      v1 <- getS[Int]
     } yield v1
 
     wait(t(0)) shouldBe (10, 10)

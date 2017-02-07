@@ -24,28 +24,28 @@ class AsyncStreamMonad[F[+_]: Monad] extends MonadPlus[AsyncStream[F, ?]] {
     )
 }
 
-trait AsyncStreamMonadFunctions {
-  def foreach[F[+_]: Monad, A, S](stream: AsyncStream[F, A])(f: A => FState[F, S, _]): FState[F, S, Unit] =
+class AsyncStreamMonadFunctions[F[+_]: Monad] {
+  def foreach[A, S](stream: AsyncStream[F, A])(f: A => FState[F, S, _]): FState[F, S, Unit] =
     FState(s => {
       stream.foldLeft(s.point[F])((fS, a) => fS.flatMap(s2 => f(a)(s2).map(_._2)))
         .flatMap(identity).map(((), _))
     })
 
-  def isEmpty[F[+_]: Monad, A, S](stream: AsyncStream[F, A]): FState[F, S, Boolean] =
+  def isEmpty[A, S](stream: AsyncStream[F, A]): FState[F, S, Boolean] =
     FState(s => stream.data.map(step => (step eq END, s)))
 
-  def isEmpty[F[+_]: Monad, A, S](f: S => AsyncStream[F, A])(implicit fsm: FStateMonad[F, S]): FState[F, S, Boolean] =
+  def isEmpty[A, S](f: S => AsyncStream[F, A])(implicit fsm: FStateMonad[F, S]): FState[F, S, Boolean] =
     fsm.fcondS((s: S) => isEmpty(f(s)))
 
-  def notEmpty[F[+_]: Monad, A, S](stream: AsyncStream[F, A]): FState[F, S, Boolean] =
+  def notEmpty[A, S](stream: AsyncStream[F, A]): FState[F, S, Boolean] =
     FState(s => stream.data map (step => (!(step eq END), s)))
 
-  def notEmpty[F[+_]: Monad, A, S](f: S => AsyncStream[F, A])(implicit fsm: FStateMonad[F, S]): FState[F, S, Boolean] =
+  def notEmpty[A, S](f: S => AsyncStream[F, A])(implicit fsm: FStateMonad[F, S]): FState[F, S, Boolean] =
     fsm.fcondS(s => notEmpty(f(s)))
 
-  def get[F[+_]: Monad, A, S](stream: AsyncStream[F, A]): FState[F, S, (A, AsyncStream[F, A])] =
+  def get[A, S](stream: AsyncStream[F, A]): FState[F, S, (A, AsyncStream[F, A])] =
     FState(s => stream.data.map(step => ((step.value, step.rest), s)))
 
-  def generateS[F[+_]: Monad, S,A](start: S)(gen: FState[F, S, A]) =
+  def generateS[S, A](start: S)(gen: FState[F, S, A]) =
     AsyncStream.generate(start)(gen.func)
 }
