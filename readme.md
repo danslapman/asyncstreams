@@ -18,6 +18,11 @@ wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
 
 See more examples in tests.
 
+asyncstreams is tested to work with:
+- standard scala futures
+- twitter futures (with some [instances](https://github.com/danslapman/asyncstreams/blob/master/src/test/scala/asyncstreams/twitterFutures/TwitterInstances.scala))
+- monix tasks
+
 asyncstreams is available via jitpack:
 
 ```
