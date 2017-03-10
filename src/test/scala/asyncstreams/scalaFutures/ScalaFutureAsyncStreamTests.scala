@@ -1,23 +1,24 @@
 package asyncstreams.scalaFutures
 
+import java.util.concurrent.Executors
+
 import asyncstreams._
 import asyncstreams.AsyncStream._
 import asyncstreams.BaseSuite
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.syntax.std.boolean._
 
-class AsyncStreamTests extends BaseSuite {
+class ScalaFutureAsyncStreamTests extends BaseSuite {
+  private implicit val executor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
   private def makeStream[T](l: Iterable[T]) = generate(l)(l => (l.nonEmpty ?(l.head, l.tail)|END).point[Future])
-
   private def makeInfStream = generate(0)(v => Future((v, v + 1)))
-
-  private def wait[T](f: Future[T]): T = Await.result(f, 10.seconds)
+  private def wait[T](f: Future[T]): T = Await.result(f, 30.seconds)
 
   test("foldLeft") {
     val s2 = makeStream(2 :: 3 :: Nil)

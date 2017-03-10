@@ -1,19 +1,23 @@
-package asyncstreams.twitterFutures
+package asyncstreams.monixTasks
 
 import asyncstreams._
 import asyncstreams.AsyncStream._
 import asyncstreams.BaseSuite
-import com.twitter.util.{Await, Future}
-import TwitterInstances._
+import monix.eval.Task
+import monix.execution.Scheduler
+import monix.scalaz._
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scalaz.syntax.monad._
 import scalaz.syntax.std.boolean._
 
-class AsyncStreamTests extends BaseSuite {
-  private def makeStream[T](l: Iterable[T]) = generate(l)(l => (l.nonEmpty ?(l.head, l.tail)|END).point[Future])
-  private def makeInfStream = generate(0)(v => Future((v, v + 1)))
-  private def wait[T](f: Future[T]): T = Await.result(f)
+class MonixTaskAsyncStreamTests extends BaseSuite {
+  private implicit val scheduler = Scheduler.fixedPool("monix", 4)
+  private def makeStream[T](l: Iterable[T]) = generate(l)(l => (l.nonEmpty ?(l.head, l.tail)|END).point[Task])
+  private def makeInfStream = generate(0)(v => ((v, v + 1)).point[Task])
+  private def wait[T](f: Task[T]): T = Await.result(f.runAsync, 30.seconds)
 
   test("foldLeft") {
     val s2 = makeStream(2 :: 3 :: Nil)
@@ -59,15 +63,15 @@ class AsyncStreamTests extends BaseSuite {
     val stream = makeInfStream.take(10)
     val buffer = ArrayBuffer[Int]()
     val task = stream.foreach(i => buffer += i)
-    Await.ready(task)
+    Await.ready(task.runAsync, 10.seconds)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("foreachF") {
     val stream = makeInfStream.take(10)
     val buffer = ArrayBuffer[Int]()
-    val task = stream.foreachF(i => Future(buffer += i))
-    Await.ready(task)
+    val task = stream.foreachF(i => (buffer += i).point[Task])
+    Await.ready(task.runAsync, 10.seconds)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
