@@ -1,6 +1,7 @@
-package asyncstreams
+package asyncstreams.stdFuture
 
 import asyncstreams.Utils._
+import asyncstreams.{AsyncStream, Implicits}
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -11,8 +12,8 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.monadPlus._
 
 class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
-  import Implicits.ScalaFuture._
   import Implicits.MonadErrorInstances._
+  import Implicits.ScalaFuture._
   import Implicits.asStateTOps
   private val ftInstance = asStateTOps[Future]
   import ftInstance._

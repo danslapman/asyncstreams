@@ -1,10 +1,11 @@
-package asyncstreams
+package asyncstreams.stdFuture
 
 import java.util.concurrent.Executors
 
 import asyncstreams.Utils._
-import Implicits.ScalaFuture._
-import Implicits.MonadErrorInstances._
+import asyncstreams.{ASImpl, AsyncStream}
+import asyncstreams.Implicits.ScalaFuture._
+import asyncstreams.Implicits.MonadErrorInstances._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
@@ -61,7 +62,7 @@ class AsyncStreamTests extends FunSuite with Matchers {
 
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
-    wait(r.to[List], 10.seconds) shouldBe (0 to 999999)
+    wait(r.to[List], 20.seconds) shouldBe (0 to 999999)
   }
 
   test("foreach") {
