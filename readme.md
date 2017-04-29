@@ -1,11 +1,13 @@
 asyncstreams [![Release](https://jitpack.io/v/danslapman/asyncstreams.svg)](https://jitpack.io/#danslapman/asyncstreams)
 =========
 
+**Note: 0.4 release is outdated, use master-SNAPSHOT for now**
+
 asyncstreams is a monadic asynchronous stream library. It allows you to write stateful asynchronous algorithms
 that emits elements into a stream:
 
 ```scala
-val stream = generateS(0) {
+val stream = genS(0) {
       for {
         s <- getS[Int]
         if s < 3
@@ -20,15 +22,14 @@ See more examples in tests.
 
 asyncstreams is tested to work with:
 - standard scala futures
-- twitter futures (with some [instances](https://github.com/danslapman/asyncstreams/blob/master/src/test/scala/asyncstreams/twitterFutures/TwitterInstances.scala))
-- monix tasks
+- monix tasks (WIP, there are some issues)
 
 asyncstreams is available via jitpack:
 
 ```
     resolvers += "jitpack" at "https://jitpack.io"
 
-    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.4"
+    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "master-SNAPSHOT"
 ```
 
-asyncstreams is based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
+asyncstreams initially based on [scala-async](https://github.com/iboltaev/scala-async) ideas.

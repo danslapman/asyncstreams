@@ -1,19 +1,23 @@
 name := "asyncstreams"
 
-version := "0.5-SNAPSHOT"
+version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.2"
+
+parallelExecution in ThisBuild := false
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
 val versions = Map(
-  "monix" -> "2.2.3"
+  "monix" -> "2.2.4"
 )
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.9",
-  "com.twitter" %% "util-core" % "6.41.0" % Test,
+  "org.scalaz" %% "scalaz-core" % "7.2.11",
   "io.monix" %% "monix-eval" % versions("monix") % Test,
   "io.monix" %% "monix-scalaz-72" % versions("monix") % Test,
-  "org.scalatest" %% "scalatest" % "3.0.1" % Test
+  //"com.twitter" %% "util-core" % "6.43.0" % Test,
+  //"io.catbird" %% "catbird-util" % "0.14.0" % Test, //cats instances for util-core
+  //"com.codecommit" %% "shims-core" % "1.0-b0e5152" % Test,
+  "org.scalatest" %% "scalatest" % "3.0.3" % Test
 )

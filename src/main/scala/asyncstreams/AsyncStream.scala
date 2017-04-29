@@ -4,73 +4,52 @@ import scala.annotation.unchecked.{uncheckedVariance => uV}
 import scala.collection.GenIterable
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
-import scalaz.Monad
-import scalaz.syntax.monad._
+import scalaz.syntax.monadPlus._
+import scalaz.{Monad, MonadPlus}
 
-case class AsyncStream[F[+_]: Monad, A](data: F[Step[A, AsyncStream[F, A]]]) {
-  import AsyncStream._
+class AsyncStream[F[+_]: Monad, A](val data: F[Step[A, AsyncStream[F, A]]]) {
+  type SStep = Step[A, AsyncStream[F, A]]
 
-  def foldLeft[B](start: B)(f: (B, A) => B): F[B] = {
-    def impl(d: F[Step[A, AsyncStream[F, A]]], acc: F[B]): F[B] =
-      d.flatMap {
-        case END => acc
-        case step => impl(step.rest.data, acc map (b => f(b, step.value)))
-      }
+  def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]], methods: ASImpl[F]): F[Col[A]] =
+    methods.collectLeft(this)(cbf())((col, el) => col += el).map(_.result())
 
-    impl(data, start.point[F])
+  def takeWhile(p: A => Boolean)(implicit impl: ASImpl[F]): AsyncStream[F, A] = impl.takeWhile(this)(p)
+
+  def take(n: Int)(implicit smp: MonadPlus[AsyncStream[F, ?]]): AsyncStream[F, A] =
+    if (n <= 0) smp.empty
+    else AsyncStream {
+      data.map(p => Step(p.value, p.rest.take(n - 1)))
+    }
+
+  def foreach[U](f: (A) => U)(implicit methods: ASImpl[F]): F[Unit] =
+    methods.collectLeft(this)(())((_: Unit, a: A) => {f(a); ()})
+
+  def foreachF[U](f: (A) => F[U])(implicit impl: ASImpl[F]): F[Unit] =
+    impl.collectLeft(this)(().point[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(identity)
+
+  def flatten[B](implicit asIterable: A => GenIterable[B], smp: MonadPlus[AsyncStream[F, ?]], impl: ASImpl[F]): AsyncStream[F, B] = {
+    def streamChunk(step: AsyncStream[F, A]#SStep): AsyncStream[F, B] =
+      impl.fromIterable(asIterable(step.value).seq) <+> step.rest.flatten
+
+    AsyncStream(data.flatMap(step => streamChunk(step).data))
   }
 
-  def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): F[Col[A]] =
-    foldLeft(cbf())((col, el) => col += el).map(_.result())
-
-
-  def takeWhile(p: A => Boolean): AsyncStream[F, A] =
-    new AsyncStream[F, A](data map {
-      case END => END
-      case step if !p(step.value) => END
-      case step => Step(step.value, step.rest.takeWhile(p))
-    })
-
-
-  def take(n: Int): AsyncStream[F, A] =
-    if (n <= 0) nil
-    else AsyncStream(data.map {
-      case END => END
-      case p => Step(p.value, p.rest.take(n - 1))
-    })
-
-  def foreach[U](f: (A) => U): F[Unit] =
-    foldLeft(())((_: Unit, a: A) => {f(a); ()})
-
-  def foreachF[U](f: (A) => F[U]): F[Unit] =
-    foldLeft(().point[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(identity)
-
-  def flatten[B](implicit asIterable: A => GenIterable[B]): AsyncStream[F, B] = {
-    val streamChunk = (p: Step[A, AsyncStream[F, A]]) =>
-      concat(generate(asIterable(p.value))(it => if (it.nonEmpty) (it.head, it.tail).point[F] else ENDF[F]), p.rest.flatten)
-
-    AsyncStream(data.flatMap {
-      case END => ENDF[F]
-      case step => streamChunk(step).data
-    })
-  }
+  def isEmpty(implicit impl: ASImpl[F]): F[Boolean] = impl.isEmpty(this)
+  def nonEmpty(implicit impl: ASImpl[F]): F[Boolean] = impl.isEmpty(this).map(!_)
 }
 
 object AsyncStream {
-  def nil[F[+_]: Monad, A]: AsyncStream[F, A] = AsyncStream(ENDF[F])
-  def single[F[+_]: Monad, A](item: A): AsyncStream[F, A] =
-    AsyncStream(Step(item, nil[F, A]).point[F])
+  def apply[F[+_]: Monad, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] = new AsyncStream(data)
+  def asyncNil[F[+_]: Monad, A](implicit impl: ASImpl[F]): AsyncStream[F, A] = impl.empty
 
-  def generate[F[+_]: Monad, S, A](start: S)(gen: S => F[(A, S)]): AsyncStream[F, A] =
-    AsyncStream(gen(start).map {
-      case END => END
-      case (el, rest) => Step(el, generate(rest)(gen))
-    })
+  private[asyncstreams] def generate[F[+_]: Monad, S, A](start: S)(gen: S => F[(S, A)])(implicit smp: MonadPlus[AsyncStream[F, ?]]): AsyncStream[F, A] = AsyncStream {
+    gen(start).map((stateEl: (S, A)) => Step(stateEl._2, generate(stateEl._1)(gen)))
+  }
 
-  def concat[F[+_]: Monad, A](s1: AsyncStream[F, A], s2: AsyncStream[F, A]): AsyncStream[F, A] =
-    new AsyncStream[F, A](s1.data.flatMap {
-      case END => s2.data
-      case step => Step(step.value, concat(step.rest, s2)).point[F]
-    })
+  def unfold[F[+_]: Monad, T](start: T)(makeNext: T => T)(implicit smp: MonadPlus[AsyncStream[F, ?]]): AsyncStream[F, T] =
+    generate(start)(s => (makeNext(s), s).point[F])
+
+  implicit class AsyncStreamOps[F[+_]: Monad, A](stream: => AsyncStream[F, A]) {
+    def ~::(el: A) = AsyncStream(Step(el, stream).point[F])
+  }
 }
-
