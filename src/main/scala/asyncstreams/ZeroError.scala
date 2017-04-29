@@ -5,8 +5,7 @@ import scala.language.higherKinds
 import scalaz.MonadError
 import scalaz.std.scalaFuture._
 
-//TODO: proper variance
-abstract class ZeroError[T, F[_]: MonadError[?[_], T]] {
+abstract class ZeroError[T, F[+_]: λ[`x[+_]` => MonadError[x, Throwable]]] {
   val zeroElement: T
 }
 

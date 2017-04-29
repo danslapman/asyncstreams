@@ -8,7 +8,7 @@ import scalaz.{MonadError, MonadPlus}
   * This class doesn't fully implement MonadPlus
   * it is usable only for filtering
   */
-class MonadFilterForMonadError[F[_]](implicit fmp: MonadError[F, Throwable], ze: ZeroError[Throwable, F]) extends MonadPlus[F] {
+class MonadFilterForMonadError[F[+_]](implicit fmp: MonadError[F, Throwable], ze: ZeroError[Throwable, F]) extends MonadPlus[F] {
   override def point[A](a: => A): F[A] = fmp.point(a)
 
   override def empty[A]: F[A] = ze.zeroElement.raiseError

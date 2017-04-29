@@ -8,7 +8,6 @@ object Utils {
     def toAS[F[+_]: Monad](implicit methods: ASImpl[F]): AsyncStream[F, T] = methods.fromIterable(it)
   }
 
-  //TODO: set proper variance
-  def monadErrorFilter[F[+_]: MonadError[?[_], Throwable] : ZeroError[Throwable, ?[_]]]: MonadPlus[F] =
+  def monadErrorFilter[F[+_]: λ[`x[+_]` => MonadError[x, Throwable]] : λ[`x[+_]` => ZeroError[Throwable, x]]]: MonadPlus[F] =
     new MonadFilterForMonadError[F]
 }
