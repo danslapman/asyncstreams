@@ -1,8 +1,6 @@
 asyncstreams [![Release](https://jitpack.io/v/danslapman/asyncstreams.svg)](https://jitpack.io/#danslapman/asyncstreams)
 =========
 
-**Note: 0.4 release is outdated, use master-SNAPSHOT for now**
-
 asyncstreams is a monadic asynchronous stream library. It allows you to write stateful asynchronous algorithms
 that emits elements into a stream:
 
@@ -22,6 +20,7 @@ See more examples in tests.
 
 asyncstreams is tested to work with:
 - standard scala futures
+- twitter futures
 - monix tasks
 
 asyncstreams is available via jitpack:

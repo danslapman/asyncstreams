@@ -1,27 +1,24 @@
-package asyncstreams.stdFuture
-
-import java.util.concurrent.Executors
+package asyncstreams.twitterFuture
 
 import asyncstreams.Utils._
 import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.ScalaFuture._
 import asyncstreams.Implicits.MonadErrorInstances._
+import com.twitter.util.{Await, Future}
+import io.catbird.util.FutureInstances
 import org.scalatest.{FunSuite, Matchers}
+import harmony.toscalaz.typeclass.MonadErrorConverter._
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scalaz.std.scalaFuture._
 import scalaz.syntax.monadPlus._
 
-class AsyncStreamTests extends FunSuite with Matchers {
-  private implicit val executor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with FutureInstances {
+  import TwFutureZeroError.ze
 
+  private def wait[T](f: Future[T]): T = Await.result(f)
   private def makeInfStream = AsyncStream.unfold(0)(_ + 1)
-  private def wait[T](f: Future[T], d: FiniteDuration = 5.seconds): T = Await.result(f, d)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil
+    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
     wait(s.to[List]) shouldBe List(1, 2, 3)
   }
 
@@ -62,14 +59,14 @@ class AsyncStreamTests extends FunSuite with Matchers {
 
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
-    wait(r.to[List], 20.seconds) shouldBe (0 to 999999)
+    wait(r.to[List]) shouldBe (0 to 999999)
   }
 
   test("foreach") {
     val stream = makeInfStream.take(10)
     val buffer = ArrayBuffer[Int]()
     val task = stream.foreach(i => buffer += i)
-    Await.ready(task, 10.seconds)
+    Await.ready(task)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
@@ -77,13 +74,13 @@ class AsyncStreamTests extends FunSuite with Matchers {
     val stream = makeInfStream.take(10)
     val buffer = ArrayBuffer[Int]()
     val task = stream.foreachF(i => Future(buffer += i))
-    Await.ready(task, 10.seconds)
+    Await.ready(task)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("flatten") {
     val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS
     val flatStream = stream.flatten
-    wait(flatStream.to[Vector], 20.seconds) shouldBe Vector.range(0, 1000000)
+    wait(flatStream.to[Vector]) shouldBe Vector.range(0, 1000000)
   }
 }

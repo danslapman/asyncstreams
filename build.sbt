@@ -16,8 +16,8 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.15",
   "io.monix" %% "monix-eval" % versions("monix") % Test,
   "io.monix" %% "monix-scalaz-72" % versions("monix") % Test,
-  //"com.twitter" %% "util-core" % "6.43.0" % Test,
-  //"io.catbird" %% "catbird-util" % "0.14.0" % Test, //cats instances for util-core
-  //"com.codecommit" %% "shims-core" % "1.0-b0e5152" % Test,
+  "com.twitter" %% "util-core" % "6.45.0" % Test,
+  "io.catbird" %% "catbird-util" % "0.15.0" % Test,
+  "me.jeffshaw.harmony" %% "harmony_cats0-9-0_scalaz7-2" % "1.1" % Test,
   "org.scalatest" %% "scalatest" % "3.0.3" % Test
 )

@@ -13,13 +13,11 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scalaz.syntax.monadPlus._
 
-class AsyncStreamTests extends FunSuite with Matchers {
+class AsyncStreamTestsWithMonixTask extends FunSuite with Matchers {
   import TaskZeroError.ze
   private implicit val scheduler = Scheduler.fixedPool("monix", 4)
   private def makeInfStream = AsyncStream.unfold[Task, Int](0)(_ + 1)
   private def wait[T](f: Task[T], d: FiniteDuration = 5.seconds): T = Await.result(f.runAsync, d)
-
-  Task.never
 
   test("composition operator") {
     val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Task, Int]
