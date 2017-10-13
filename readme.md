@@ -22,7 +22,7 @@ See more examples in tests.
 
 asyncstreams is tested to work with:
 - standard scala futures
-- monix tasks (WIP, there are some issues)
+- monix tasks
 
 asyncstreams is available via jitpack:
 

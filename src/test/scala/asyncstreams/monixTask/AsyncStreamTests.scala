@@ -61,12 +61,10 @@ class AsyncStreamTests extends FunSuite with Matchers {
     wait(r.to[List]) shouldBe List(0, 1, 2)
   }
 
-  /*
-  Fails with timeout
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
-    wait(r.to[List], 30.seconds) shouldBe (0 to 999999)
-  }*/
+    wait(r.to[List], 10.seconds) shouldBe (0 to 999999)
+  }
 
   test("foreach") {
     val stream = makeInfStream.take(10)
@@ -84,11 +82,9 @@ class AsyncStreamTests extends FunSuite with Matchers {
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
-  /*
-  Fails with timeout
   test("flatten") {
     val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS[Task]
     val flatStream = stream.flatten
     wait(flatStream.to[Vector], 60.seconds) shouldBe Vector.range(0, 1000000)
-  }*/
+  }
 }
