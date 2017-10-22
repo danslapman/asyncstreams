@@ -28,7 +28,7 @@ asyncstreams is available via jitpack:
 ```
     resolvers += "jitpack" at "https://jitpack.io"
 
-    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "master-SNAPSHOT"
+    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5"
 ```
 
 asyncstreams initially based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
