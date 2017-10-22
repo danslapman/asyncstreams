@@ -13,7 +13,6 @@ import scalaz.syntax.monadPlus._
 
 class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
   import Implicits.MonadErrorInstances._
-  import Implicits.ScalaFuture._
   import Implicits.asStateTOps
   private val ftInstance = asStateTOps[Future]
   import ftInstance._

@@ -4,7 +4,6 @@ import java.util.concurrent.Executors
 
 import asyncstreams.Utils._
 import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.ScalaFuture._
 import asyncstreams.Implicits.MonadErrorInstances._
 import org.scalatest.{FunSuite, Matchers}
 
