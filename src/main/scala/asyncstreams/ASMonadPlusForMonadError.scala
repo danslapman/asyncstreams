@@ -9,7 +9,6 @@ import scalaz.{MonadError, MonadPlus}
 class ASMonadPlusForMonadError[F[+_]](implicit fmp: MonadError[F, Throwable], zk: ZeroK[F]) extends MonadPlus[AsyncStream[F, ?]] {
   override def bind[A, B](fa: AsyncStream[F, A])(f: (A) => AsyncStream[F, B]): AsyncStream[F, B] = AsyncStream {
     fa.data.flatMap(step => f(step.value).data.map(step2 => Step(step2.value, plus(step2.rest, bind(step.rest)(f)))))
-    .handleError(_ => zk.zero)
   }
 
   override def plus[A](a: AsyncStream[F, A], b: => AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
