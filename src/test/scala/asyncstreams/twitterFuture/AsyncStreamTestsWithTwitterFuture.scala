@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 import scalaz.syntax.monadPlus._
 
 class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with FutureInstances {
-  import TwFutureZeroError.ze
+  import TwitterFutureZeroK.zeroK
 
   private def wait[T](f: Future[T]): T = Await.result(f)
   private def makeInfStream = AsyncStream.unfold(0)(_ + 1)
