@@ -13,7 +13,7 @@ val stream = genS(0) {
       } yield s
     }
 
-wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
+Await.result(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
 ```
 
 See more examples in tests.
