@@ -1,5 +1,6 @@
 package asyncstreams
 
+/*
 import scala.language.higherKinds
 import scalaz.syntax.monad._
 import scalaz.{IndexedStateT, Monad, MonadPlus, MonadState, StateT}
@@ -33,3 +34,4 @@ class ASStateTOps[F[+_]: Monad](implicit methods: ASImpl[F]) {
   def genS[S, A](start: S)(gen: StateT[F, S, A])(implicit smp: MonadPlus[AsyncStream[F, ?]]): AsyncStream[F, A] =
     AsyncStream.generate(start)(gen.run)
 }
+*/

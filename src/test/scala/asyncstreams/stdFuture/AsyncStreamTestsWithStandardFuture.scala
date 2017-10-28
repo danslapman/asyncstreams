@@ -5,13 +5,16 @@ import java.util.concurrent.Executors
 import asyncstreams.Utils._
 import asyncstreams.{ASImpl, AsyncStream}
 import asyncstreams.Implicits.MonadErrorInstances._
+import cats.Monad
+import cats.instances.future._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.semigroupk._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scalaz.std.scalaFuture._
-import scalaz.syntax.monadPlus._
 
 class AsyncStreamTestsWithStandardFuture extends FunSuite with Matchers {
   private implicit val executor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
@@ -20,7 +23,7 @@ class AsyncStreamTestsWithStandardFuture extends FunSuite with Matchers {
   private def wait[T](f: Future[T], d: FiniteDuration = 5.seconds): T = Await.result(f, d)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil
+    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
     wait(s.to[List]) shouldBe List(1, 2, 3)
   }
 

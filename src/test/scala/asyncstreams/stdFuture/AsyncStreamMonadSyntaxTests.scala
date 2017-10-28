@@ -1,5 +1,6 @@
 package asyncstreams.stdFuture
 
+/*
 import asyncstreams.Utils._
 import asyncstreams.{AsyncStream, Implicits}
 import org.scalatest.{FunSuite, Matchers}
@@ -80,3 +81,4 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
     wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
   }
 }
+*/

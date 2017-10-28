@@ -3,13 +3,14 @@ package asyncstreams.twitterFuture
 import asyncstreams.Utils._
 import asyncstreams.{ASImpl, AsyncStream}
 import asyncstreams.Implicits.MonadErrorInstances._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.semigroupk._
 import com.twitter.util.{Await, Future}
 import io.catbird.util.FutureInstances
 import org.scalatest.{FunSuite, Matchers}
-import harmony.toscalaz.typeclass.MonadErrorConverter._
 
 import scala.collection.mutable.ArrayBuffer
-import scalaz.syntax.monadPlus._
 
 class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with FutureInstances {
   private def wait[T](f: Future[T]): T = Await.result(f)

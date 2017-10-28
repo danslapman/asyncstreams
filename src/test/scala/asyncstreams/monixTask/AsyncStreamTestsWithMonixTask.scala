@@ -1,5 +1,6 @@
 package asyncstreams.monixTask
 
+/*
 import asyncstreams.Utils._
 import asyncstreams.{ASImpl, AsyncStream}
 import asyncstreams.Implicits.MonadErrorInstances._
@@ -85,3 +86,4 @@ class AsyncStreamTestsWithMonixTask extends FunSuite with Matchers {
     wait(flatStream.to[Vector], 60.seconds) shouldBe Vector.range(0, 1000000)
   }
 }
+*/
