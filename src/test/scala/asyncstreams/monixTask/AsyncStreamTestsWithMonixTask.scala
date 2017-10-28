@@ -1,18 +1,19 @@
 package asyncstreams.monixTask
 
-/*
 import asyncstreams.Utils._
 import asyncstreams.{ASImpl, AsyncStream}
 import asyncstreams.Implicits.MonadErrorInstances._
+import cats.syntax.applicative._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.semigroupk._
 import monix.eval.Task
 import monix.execution.Scheduler
-import monix.scalaz._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scalaz.syntax.monadPlus._
 
 class AsyncStreamTestsWithMonixTask extends FunSuite with Matchers {
   private implicit val scheduler = Scheduler.fixedPool("monix", 4)
@@ -75,7 +76,7 @@ class AsyncStreamTestsWithMonixTask extends FunSuite with Matchers {
   test("foreachF") {
     val stream = makeInfStream.take(10)
     val buffer = ArrayBuffer[Int]()
-    val task = stream.foreachF(i => (buffer += i).point[Task])
+    val task = stream.foreachF(i => (buffer += i).pure[Task])
     Await.ready(task.runAsync, 10.seconds)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
@@ -86,4 +87,3 @@ class AsyncStreamTestsWithMonixTask extends FunSuite with Matchers {
     wait(flatStream.to[Vector], 60.seconds) shouldBe Vector.range(0, 1000000)
   }
 }
-*/
