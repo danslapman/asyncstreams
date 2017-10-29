@@ -1,6 +1,6 @@
 package asyncstreams
 
-import asyncstreams.typeclass.ZeroK
+import alleycats.EmptyK
 import cats.{Alternative, Monad, MonadError}
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
@@ -9,8 +9,8 @@ import cats.syntax.functor._
 
 import scala.language.higherKinds
 
-class ASInstanceForMonadError[F[+_]](implicit fme: MonadError[F, Throwable], zk: ZeroK[F]) extends Monad[AsyncStream[F, ?]] with Alternative[AsyncStream[F, ?]] {
-  override def empty[A] = AsyncStream(zk.zero)
+class ASInstanceForMonadError[F[+_]](implicit fme: MonadError[F, Throwable], zk: EmptyK[F]) extends Monad[AsyncStream[F, ?]] with Alternative[AsyncStream[F, ?]] {
+  override def empty[A] = AsyncStream(zk.empty)
 
   override def combineK[A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
     x.data.map(step => Step(step.value, combineK(step.rest, y))).handleErrorWith(_ => y.data)
