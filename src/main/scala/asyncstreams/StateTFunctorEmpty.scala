@@ -1,6 +1,6 @@
 package asyncstreams
 
-import alleycats.EmptyK
+import asyncstreams.typeclass.EmptyK
 import cats.data.StateT
 import cats.mtl.FunctorEmpty
 import cats.syntax.applicative._

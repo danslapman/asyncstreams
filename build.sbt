@@ -17,7 +17,6 @@ val versions = Map(
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "1.0.0-MF",
   "org.typelevel" %% "cats-mtl-core" % "0.0.2",
-  "org.typelevel" %% "alleycats-core" % "0.2.0",
   "io.monix" %% "monix-eval" % versions("monix") % Test,
   "com.twitter" %% "util-core" % "7.1.0" % Test,
   "io.catbird" %% "catbird-util" % "0.18.0" % Test,
