@@ -22,13 +22,13 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
     val ms = stateState[Future, Int]
 
     val fstate = for {
-      _ <- foreach(List(0, 1, 2).toAS[Future]) {
-        v => ms.modify(_ + 1)
+      _ <- foreach(List(0, 1, 2, 3).toAS[Future]) {
+        v => ms.modify(_ + v)
       }
       v2 <- ms.get
     } yield v2
 
-    wait(fstate.run(0)) shouldBe (3, 3)
+    wait(fstate.run(0)) shouldBe (6, 6)
   }
 
   /*
