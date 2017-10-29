@@ -23,12 +23,19 @@ asyncstreams is tested to work with:
 - twitter futures
 - monix tasks
 
+Currently, asyncstreams' main branch uses scalaz's typeclasses. If Your projects uses cats
+or have some other cats-based dependencies, You can use cats-based port, which have feature parity
+with master, but is experimental for now.
+
 asyncstreams is available via jitpack:
 
 ```
     resolvers += "jitpack" at "https://jitpack.io"
 
     libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5"
+    
+    //if You need cats:
+    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5-cats"
 ```
 
 asyncstreams initially based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
