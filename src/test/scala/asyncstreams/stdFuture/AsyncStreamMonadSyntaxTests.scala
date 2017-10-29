@@ -1,9 +1,11 @@
 package asyncstreams.stdFuture
 
+import asyncstreams._
 import asyncstreams.Implicits
 import asyncstreams.Utils._
 import cats.instances.future._
 import cats.mtl.instances.state._
+import cats.mtl.syntax.empty._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -65,8 +67,9 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
     wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
   }
 
-  /*
   test("Generate finite stream") {
+    import Implicits.stateTFunctorEmpty
+
     val ms = stateState[Future, Int]
 
     val stream = genS(0) {
@@ -79,5 +82,4 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
 
     wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
   }
-  */
 }

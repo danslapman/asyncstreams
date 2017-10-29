@@ -1,7 +1,9 @@
 package asyncstreams
 
 import alleycats.EmptyK
-import cats.{Alternative, Monad, MonadError}
+import cats.data.StateT
+import cats.mtl.FunctorEmpty
+import cats.{Alternative, Functor, Monad, MonadError}
 
 import scala.language.higherKinds
 
@@ -13,6 +15,9 @@ object Implicits {
       override def empty[A]: F[A] = me.raiseError(new NoSuchElementException)
     }
   }
+
+  implicit def stateTFunctorEmpty[F[+_], S](implicit functor: Functor[StateT[F, S, ?]], mf: Monad[F], emptyk: EmptyK[F]): FunctorEmpty[StateT[F, S, ?]] =
+    new StateTFunctorEmpty[F, S]()
 
   def asStateTOps[F[+_]: Monad](implicit methods: ASImpl[F]) = new ASStateTOps[F]
 }
