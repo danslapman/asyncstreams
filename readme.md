@@ -34,7 +34,7 @@ asyncstreams is available via jitpack:
 
     libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5"
     
-    //if You need cats:
+    //or if You need cats:
     libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5-cats"
 ```
 
