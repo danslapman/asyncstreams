@@ -1,6 +1,6 @@
 package asyncstreams
 
-import asyncstreams.typeclass.EmptyK
+import alleycats.EmptyK
 import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
