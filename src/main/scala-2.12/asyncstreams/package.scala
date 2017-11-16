@@ -5,6 +5,6 @@ import scala.language.higherKinds
 
 package object asyncstreams {
   implicit class FunctorWithFilter[F[_] : FunctorEmpty, A](fa: F[A]) {
-    def withFilter(f: A ⇒ Boolean): F[A] = fa.filter(f)
+    def withFilter(f: A => Boolean): F[A] = fa.filter(f)
   }
 }
