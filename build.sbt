@@ -1,8 +1,12 @@
 name := "asyncstreams"
 
-version := "1.0"
+organization := "danslapman"
+
+version := "0.5"
 
 scalaVersion := "2.12.4"
+
+crossScalaVersions := Seq("2.11.12", "2.12.4")
 
 parallelExecution in ThisBuild := false
 
@@ -21,3 +25,9 @@ libraryDependencies ++= Seq(
   "me.jeffshaw.harmony" %% "harmony_cats1-0-0-mf_scalaz7-2" % "2.0" % Test,
   "org.scalatest" %% "scalatest" % "3.0.4" % Test
 )
+
+licenses += ("WTFPL", url("http://www.wtfpl.net"))
+
+bintrayOrganization := Some("danslapman")
+
+bintrayReleaseOnPublish in ThisBuild := false
