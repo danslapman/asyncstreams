@@ -6,10 +6,10 @@ scalaVersion := "2.12.4"
 
 parallelExecution in ThisBuild := false
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
 
 val versions = Map(
-  "monix" -> "2.3.0"
+  "monix" -> "2.3.2"
 )
 
 libraryDependencies ++= Seq(
