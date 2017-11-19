@@ -1,6 +1,6 @@
 name := "asyncstreams"
 
-version := "1.0"
+version := "0.5-cats"
 
 scalaVersion := "2.12.4"
 
@@ -26,3 +26,9 @@ libraryDependencies ++= Seq(
   "io.catbird" %% "catbird-util" % "0.21.0" % Test,
   "org.scalatest" %% "scalatest" % "3.0.4" % Test
 )
+
+licenses += ("WTFPL", url("http://www.wtfpl.net"))
+
+bintrayOrganization := Some("danslapman")
+
+bintrayReleaseOnPublish in ThisBuild := false
