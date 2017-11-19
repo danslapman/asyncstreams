@@ -1,4 +1,4 @@
-asyncstreams [![Release](https://jitpack.io/v/danslapman/asyncstreams.svg)](https://jitpack.io/#danslapman/asyncstreams)
+asyncstreams [![Release](https://jitpack.io/v/danslapman/asyncstreams.svg)](https://jitpack.io/#danslapman/asyncstreams) [ ![Download](https://api.bintray.com/packages/danslapman/maven/asyncstreams/images/download.svg) ](https://bintray.com/danslapman/maven/asyncstreams/_latestVersion)
 =========
 
 asyncstreams is a monadic asynchronous stream library. It allows you to write stateful asynchronous algorithms
@@ -27,15 +27,21 @@ Currently, asyncstreams' main branch uses scalaz's typeclasses. If Your projects
 or have some other cats-based dependencies, You can use cats-based port, which have feature parity
 with master, but is experimental for now.
 
-asyncstreams is available via jitpack:
+asyncstreams' master branch is available via jitpack:
 
 ```
     resolvers += "jitpack" at "https://jitpack.io"
 
     libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5"
-    
-    //or if You need cats:
-    libraryDependencies += "com.github.danslapman" %% "asyncstreams" % "0.5-cats"
 ```
+
+cats-based release lives on bintray:
+
+```
+resolvers += Resolver.bintrayRepo("danslapman", "maven")
+
+libraryDependencies += "danslapman" %% "asyncstreams" % "0.5-cats-rc1"
+```
+
 
 asyncstreams initially based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
