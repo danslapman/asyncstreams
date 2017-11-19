@@ -11,7 +11,7 @@ import scala.collection.GenIterable
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
-class AsyncStream[F[+_]: Monad, A](val data: F[Step[A, AsyncStream[F, A]]]) {
+class AsyncStream[F[+_]: Monad, A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
   type SStep = Step[A, AsyncStream[F, A]]
 
   def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]], methods: ASImpl[F]): F[Col[A]] =
@@ -43,7 +43,7 @@ class AsyncStream[F[+_]: Monad, A](val data: F[Step[A, AsyncStream[F, A]]]) {
 }
 
 object AsyncStream {
-  def apply[F[+_]: Monad, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] = new AsyncStream(data)
+  private[asyncstreams] def apply[F[+_]: Monad, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] = new AsyncStream(data)
   def asyncNil[F[+_]: Monad, A](implicit impl: ASImpl[F]): AsyncStream[F, A] = impl.empty
 
   private[asyncstreams] def generate[F[+_]: Monad, S, A](start: S)(gen: S => F[(S, A)])(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, A] = AsyncStream {
@@ -52,8 +52,4 @@ object AsyncStream {
 
   def unfold[F[+_]: Monad, T](start: T)(makeNext: T => T)(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] =
     generate(start)(s => (makeNext(s), s).pure[F])
-
-  implicit class AsyncStreamOps[F[+_]: Monad, A](stream: => AsyncStream[F, A]) {
-    def ~::(el: A) = AsyncStream(Step(el, stream).pure[F])
-  }
 }

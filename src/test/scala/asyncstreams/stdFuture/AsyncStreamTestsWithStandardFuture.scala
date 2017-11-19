@@ -2,9 +2,9 @@ package asyncstreams.stdFuture
 
 import java.util.concurrent.Executors
 
-import asyncstreams.Utils._
+import asyncstreams._
+import asyncstreams.impl._
 import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.MonadErrorInstances._
 import cats.Monad
 import cats.instances.future._
 import cats.syntax.flatMap._

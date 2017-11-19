@@ -1,8 +1,8 @@
 package asyncstreams.stdFuture
 
 import asyncstreams._
-import asyncstreams.Implicits
-import asyncstreams.Utils._
+import asyncstreams.impl._
+import asyncstreams.statet._
 import cats.instances.future._
 import cats.mtl.instances.state._
 import cats.mtl.syntax.empty._
@@ -13,8 +13,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
-  import Implicits.MonadErrorInstances._
-  import Implicits.asStateTOps
   private val ftInstance = asStateTOps[Future]
   import ftInstance._
 
@@ -68,8 +66,6 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
   }
 
   test("Generate finite stream") {
-    import Implicits.stateTFunctorEmpty
-
     val ms = stateState[Future, Int]
 
     val stream = genS(0) {

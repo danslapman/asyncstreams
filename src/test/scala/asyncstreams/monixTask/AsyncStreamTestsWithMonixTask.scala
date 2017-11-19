@@ -1,8 +1,7 @@
 package asyncstreams.monixTask
 
-import asyncstreams.Utils._
-import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.MonadErrorInstances._
+import asyncstreams._
+import asyncstreams.impl._
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._

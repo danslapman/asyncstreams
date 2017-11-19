@@ -1,8 +1,8 @@
 package asyncstreams.twitterFuture
 
-import asyncstreams.Utils._
+import asyncstreams._
+import asyncstreams.impl._
 import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.MonadErrorInstances._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.semigroupk._
