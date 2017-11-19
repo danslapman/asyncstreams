@@ -1,5 +1,7 @@
 name := "asyncstreams"
 
+organization := "danslapman"
+
 version := "0.5-cats-rc1"
 
 scalaVersion := "2.12.4"
