@@ -6,6 +6,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.semigroupk._
 
+import scala.annotation.tailrec
 import scala.annotation.unchecked.{uncheckedVariance => uV}
 import scala.collection.GenIterable
 import scala.collection.generic.CanBuildFrom
@@ -47,6 +48,10 @@ class AsyncStream[F[+_]: Monad, A](private[asyncstreams] val data: F[Step[A, Asy
 
   def mapF[B](f: A => F[B]): AsyncStream[F, B] = AsyncStream {
     data.flatMap(s => f(s.value).map(nv => Step(nv, s.rest.mapF(f))))
+  }
+
+  def flatMap[B](f: A => AsyncStream[F, B])(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, B] = AsyncStream {
+    data.flatMap(s => (f(s.value) <+> s.rest.flatMap(f)).data)
   }
 }
 
