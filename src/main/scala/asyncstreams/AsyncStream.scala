@@ -40,6 +40,14 @@ class AsyncStream[F[+_]: Monad, A](private[asyncstreams] val data: F[Step[A, Asy
 
   def isEmpty(implicit impl: ASImpl[F]): F[Boolean] = impl.isEmpty(this)
   def nonEmpty(implicit impl: ASImpl[F]): F[Boolean] = impl.isEmpty(this).map(!_)
+
+  def map[B](f: A => B): AsyncStream[F, B] = AsyncStream {
+    data.map(s => Step(f(s.value), s.rest.map(f)))
+  }
+
+  def mapF[B](f: A => F[B]): AsyncStream[F, B] = AsyncStream {
+    data.flatMap(s => f(s.value).map(nv => Step(nv, s.rest.mapF(f))))
+  }
 }
 
 object AsyncStream {
