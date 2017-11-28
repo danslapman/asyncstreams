@@ -23,4 +23,10 @@ class AsyncStreamUtilityMethodTests extends FunSuite with Matchers {
 
     await(as.to[Vector]) shouldBe Vector.range(0, 20)
   }
+
+  test("munfoldM") {
+    val as = AsyncStream.munfoldM(Future(0))(i => Future(i + 1)).take(20)
+
+    await(as.to[Vector]) shouldBe Vector.range(0, 20)
+  }
 }
