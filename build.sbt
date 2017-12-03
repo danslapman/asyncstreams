@@ -12,7 +12,7 @@ scalacOptions += "-Ypartial-unification"
 
 parallelExecution in ThisBuild := false
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.5")
 
 val versions = Map(
   "monix" -> "3.0.0-M2",

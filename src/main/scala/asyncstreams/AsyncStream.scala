@@ -53,6 +53,13 @@ class AsyncStream[F[+_]: Monad, A](private[asyncstreams] val data: F[Step[A, Asy
   def flatMap[B](f: A => AsyncStream[F, B])(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, B] = AsyncStream {
     data.flatMap(s => (f(s.value) <+> s.rest.flatMap(f)).data)
   }
+
+  def filter(p: A => Boolean): AsyncStream[F, A] = AsyncStream {
+    data.flatMap { s =>
+      if (p(s.value)) Step(s.value, s.rest.filter(p)).pure[F]
+      else s.rest.filter(p).data
+    }
+  }
 }
 
 object AsyncStream {

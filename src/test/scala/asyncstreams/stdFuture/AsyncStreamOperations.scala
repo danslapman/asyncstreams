@@ -25,7 +25,7 @@ class AsyncStreamOperations extends FunSuite with Matchers {
   test("map lang stream") {
     val res = longStream.map(_ * 2).to[Vector]
 
-    await(res).length shouldBe 100000
+    await(res) should have length 100000
   }
 
   test("mapF") {
@@ -37,7 +37,7 @@ class AsyncStreamOperations extends FunSuite with Matchers {
   test("mapF long stream") {
     val res = longStream.mapF(v => (v * 2).pure[Future]).to[Vector]
 
-    await(res).length shouldBe 100000
+    await(res) should have length 100000
   }
 
   test("flatMap") {
@@ -49,6 +49,18 @@ class AsyncStreamOperations extends FunSuite with Matchers {
   test("flatMap long stream") {
     val res = longStream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: AsyncStream.asyncNil[Future, Int]).to[Vector]
 
-    await(res).length shouldBe 200000
+    await(res) should have length 200000
+  }
+
+  test("filter") {
+    val res = stream.filter(_ % 2 == 0).to[Vector]
+
+    await(res) shouldBe (0 to 30 by 2)
+  }
+
+  test("filter long stream") {
+    val res = longStream.filter(_ % 2 == 0).to[Vector]
+
+    await(res) should have length 50000
   }
 }
