@@ -76,7 +76,7 @@ object AsyncStream {
   def unfoldM[F[+_]: Monad, T](start: T)(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] =
     generate(start)(s => makeNext(s).map(n => (n, s)))
 
-  def munfoldM[F[+_]: Monad, T](start: F[T])(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] = AsyncStream {
+  def unfoldM[F[+_]: Monad, T](start: F[T])(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] = AsyncStream {
     start.flatMap(initial => generate(initial)(s => makeNext(s).map(n => (n, s))).data)
   }
 }
