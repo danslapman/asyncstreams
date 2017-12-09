@@ -75,4 +75,24 @@ class AsyncStreamOperations extends FunSuite with Matchers {
 
     await(res) should have length 50000
   }
+
+  test("find") {
+    val res = stream.find(_ == 10)
+
+    await(res) should be (Some(10))
+
+    val res2 = stream.find(_ == -10)
+
+    await(res2) should be (None)
+  }
+
+  test("find long stream") {
+    val res = longStream.find(_ == 10)
+
+    await(res) should be (Some(10))
+
+    val res2 = longStream.find(_ == -10)
+
+    await(res2) should be (None)
+  }
 }

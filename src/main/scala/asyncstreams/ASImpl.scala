@@ -15,6 +15,7 @@ trait ASImpl[F[+_]] {
   def fromIterable[T](it: Iterable[T]): AsyncStream[F, T]
   def takeWhile[T](s: AsyncStream[F, T])(p: T => Boolean): AsyncStream[F, T]
   def isEmpty[T](s: AsyncStream[F, T]): F[Boolean]
+  def find[T](s: AsyncStream[F, T], p: T => Boolean): F[Option[T]]
 }
 
 class ASImplForMonadError[F[+_]](implicit fmp: MonadError[F, Throwable], ze: EmptyK[F]) extends ASImpl[F] {
@@ -39,4 +40,11 @@ class ASImplForMonadError[F[+_]](implicit fmp: MonadError[F, Throwable], ze: Emp
   }
 
   override def isEmpty[T](s: AsyncStream[F, T]): F[Boolean] = s.data.map(_ => false).handleErrorWith(_ => true.pure[F])
+
+  override def find[T](s: AsyncStream[F, T], p: T => Boolean): F[Option[T]] = {
+    s.data.flatMap { s =>
+      if (p(s.value)) Some(s.value).pure[F]
+      else find(s.rest, p)
+    }.handleErrorWith(_ => None.pure[F])
+  }
 }

@@ -66,6 +66,8 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
   }
 
   def withFilter(p: A => Boolean): AsyncStream[F, A] = filter(p)
+
+  def find(p: A => Boolean)(implicit impl: ASImpl[F]): F[Option[A]] = impl.find(this, p)
 }
 
 object AsyncStream {
