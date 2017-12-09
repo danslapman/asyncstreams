@@ -1,9 +1,12 @@
 package asyncstreams
 
+import cats.kernel.Monoid
 import cats.{Alternative, Monad}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.semigroup._
+import cats.syntax.monoid._
 import cats.syntax.semigroupk._
 
 import scala.annotation.tailrec
@@ -71,6 +74,10 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
   def findF(p: A => F[Boolean])(implicit impl: ASImpl[F]): F[Option[A]] = impl.findF(this, p)
 
   def partition(p: A => Boolean): (AsyncStream[F, A], AsyncStream[F, A]) = (filter(p), filter(p.andThen(!_)))
+
+  def foldMap[B](f: A => B)(implicit impl: ASImpl[F], mb: Monoid[B]): F[B] = {
+    impl.collectLeft(this)(mb.empty)((b, a) => mb.combine(b, f(a)))
+  }
 }
 
 object AsyncStream {

@@ -2,6 +2,7 @@ package asyncstreams.stdFuture
 
 import asyncstreams._
 import asyncstreams.impl._
+import cats.instances.int._
 import cats.instances.future._
 import cats.syntax.applicative._
 import org.scalatest.{FunSuite, Matchers}
@@ -114,5 +115,11 @@ class AsyncStreamOperations extends FunSuite with Matchers {
     val res2 = longStream.findF(i => (i == -10).pure[Future])
 
     await(res2) should be (None)
+  }
+
+  test("foldMap") {
+    val res = stream.foldMap(identity)
+
+    await(res) shouldBe 465
   }
 }
