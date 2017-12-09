@@ -14,7 +14,7 @@ class AsyncStreamOperations extends FunSuite with Matchers {
   private def await[T](f: Future[T], d: Duration = 5.seconds): T = Await.result(f, d)
 
   private def stream = (0 to 30).toAS[Future]
-  private def longStream = AsyncStream.unfold(0)(_ + 1).take(100000)
+  private def longStream = AsyncStream.unfold[Future, Int](0)(_ + 1).take(100000)
 
   test("map") {
     val res = stream.map(_ * 2).to[Vector]

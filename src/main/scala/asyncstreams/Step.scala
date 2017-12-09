@@ -1,10 +1,10 @@
 package asyncstreams
 
-class Step[A, B](fp: A, sp: => B) {
+class Step[+A, +B](fp: A, sp: => B) {
   val value: A = fp
   lazy val rest: B = sp
 
-  override def toString: String = s"Step($value, $rest)"
+  override def toString: String = s"Step($value, ...)"
 }
 
 object Step {

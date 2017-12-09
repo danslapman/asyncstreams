@@ -13,19 +13,19 @@ class AsyncStreamUtilityMethodTests extends FunSuite with Matchers {
   private def await[T](f: Future[T], d: Duration = 5.seconds): T = Await.result(f, d)
 
   test("unfold") {
-    val as = AsyncStream.unfold(0)(_ + 1).take(20)
+    val as = AsyncStream.unfold[Future, Int](0)(_ + 1).take(20)
 
     await(as.to[Vector]) shouldBe Vector.range(0, 20)
   }
 
   test("unfoldM") {
-    val as = AsyncStream.unfoldM(0)(i => Future(i + 1)).take(20)
+    val as: AsyncStream[Future, Int] = AsyncStream.unfoldM(0)(i => Future(i + 1)).take(20)
 
     await(as.to[Vector]) shouldBe Vector.range(0, 20)
   }
 
-  test("unfoldM") {
-    val as = AsyncStream.unfoldM(Future(0))(i => Future(i + 1)).take(20)
+  test("unfoldMM") {
+    val as: AsyncStream[Future, Int] = AsyncStream.unfoldMM(Future(0))(i => Future(i + 1)).take(20)
 
     await(as.to[Vector]) shouldBe Vector.range(0, 20)
   }

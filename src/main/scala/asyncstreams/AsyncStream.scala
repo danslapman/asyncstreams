@@ -12,10 +12,8 @@ import scala.collection.GenIterable
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
-class AsyncStream[F[+_]: Monad, A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
-  type SStep = Step[A, AsyncStream[F, A]]
-
-  def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]], methods: ASImpl[F]): F[Col[A]] =
+class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
+  def to[Col[+_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]], methods: ASImpl[F]): F[Col[A]] =
     methods.collectLeft(this)(cbf())((col, el) => col += el).map(_.result())
 
   def takeWhile(p: A => Boolean)(implicit impl: ASImpl[F]): AsyncStream[F, A] = impl.takeWhile(this)(p)
@@ -33,7 +31,7 @@ class AsyncStream[F[+_]: Monad, A](private[asyncstreams] val data: F[Step[A, Asy
     impl.collectLeft(this)(().pure[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(identity)
 
   def flatten[B](implicit asIterable: A => GenIterable[B], smp: Alternative[AsyncStream[F, ?]], impl: ASImpl[F]): AsyncStream[F, B] = {
-    def streamChunk(step: AsyncStream[F, A]#SStep): AsyncStream[F, B] =
+    def streamChunk(step: Step[A, AsyncStream[F, A]]): AsyncStream[F, B] =
       impl.fromIterable(asIterable(step.value).seq) <+> step.rest.flatten
 
     AsyncStream(data.flatMap(step => streamChunk(step).data))
@@ -76,7 +74,7 @@ object AsyncStream {
   def unfoldM[F[+_]: Monad, T](start: T)(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] =
     generate(start)(s => makeNext(s).map(n => (n, s)))
 
-  def unfoldM[F[+_]: Monad, T](start: F[T])(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] = AsyncStream {
+  def unfoldMM[F[+_]: Monad, T](start: F[T])(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] = AsyncStream {
     start.flatMap(initial => generate(initial)(s => makeNext(s).map(n => (n, s))).data)
   }
 }
