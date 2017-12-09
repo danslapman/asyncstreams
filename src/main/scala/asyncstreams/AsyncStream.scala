@@ -24,6 +24,12 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
       data.map(p => Step(p.value, p.rest.take(n - 1)))
     }
 
+  def drop(n: Int)(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, A] =
+    if (n <= 0) this
+    else AsyncStream {
+      data.flatMap(p => p.rest.drop(n - 1).data)
+    }
+
   def foreach[U](f: (A) => U)(implicit methods: ASImpl[F]): F[Unit] =
     methods.collectLeft(this)(())((_: Unit, a: A) => {f(a); ()})
 

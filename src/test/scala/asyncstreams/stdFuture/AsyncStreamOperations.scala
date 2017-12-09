@@ -63,4 +63,16 @@ class AsyncStreamOperations extends FunSuite with Matchers {
 
     await(res) should have length 50000
   }
+
+  test("drop") {
+    val res = stream.drop(10).to[Vector]
+
+    await(res) should be (10 to 30)
+  }
+
+  test("drop long stream") {
+    val res = longStream.drop(50000).to[Vector]
+
+    await(res) should have length 50000
+  }
 }
