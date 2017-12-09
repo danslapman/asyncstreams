@@ -95,4 +95,24 @@ class AsyncStreamOperations extends FunSuite with Matchers {
 
     await(res2) should be (None)
   }
+
+  test("findF") {
+    val res = stream.findF(i => (i == 10).pure[Future])
+
+    await(res) should be (Some(10))
+
+    val res2 = stream.findF(i => (i == -10).pure[Future])
+
+    await(res2) should be (None)
+  }
+
+  test("findF long stream") {
+    val res = longStream.findF(i => (i == 10).pure[Future])
+
+    await(res) should be (Some(10))
+
+    val res2 = longStream.findF(i => (i == -10).pure[Future])
+
+    await(res2) should be (None)
+  }
 }
