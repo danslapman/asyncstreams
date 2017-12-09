@@ -5,11 +5,8 @@ import cats.{Alternative, Monad}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import cats.syntax.semigroup._
-import cats.syntax.monoid._
 import cats.syntax.semigroupk._
 
-import scala.annotation.tailrec
 import scala.annotation.unchecked.{uncheckedVariance => uV}
 import scala.collection.GenIterable
 import scala.collection.generic.CanBuildFrom
