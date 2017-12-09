@@ -58,6 +58,8 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
       else s.rest.filter(p).data
     }
   }
+
+  def withFilter(p: A => Boolean): AsyncStream[F, A] = filter(p)
 }
 
 object AsyncStream {
