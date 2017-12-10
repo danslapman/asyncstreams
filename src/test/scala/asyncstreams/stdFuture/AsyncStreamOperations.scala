@@ -131,4 +131,10 @@ class AsyncStreamOperations extends FunSuite with Matchers {
 
     await(res.to[List]) shouldBe (1, 4) :: (2, 5) :: Nil
   }
+
+  test("zipWithIndex") {
+    val res = stream.zipWithIndex.to[Vector]
+
+    await(res) shouldBe (0 to 30).zipWithIndex
+  }
 }

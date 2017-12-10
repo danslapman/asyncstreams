@@ -1,7 +1,7 @@
 package asyncstreams
 
 import cats.kernel.Monoid
-import cats.{Alternative, Monad}
+import cats.{Alternative, Applicative, Monad}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -24,7 +24,7 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
       data.map(p => Step(p.value, p.rest.take(n - 1)))
     }
 
-  def drop(n: Int)(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, A] =
+  def drop(n: Int): AsyncStream[F, A] =
     if (n <= 0) this
     else AsyncStream {
       data.flatMap(p => p.rest.drop(n - 1).data)
@@ -82,23 +82,26 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
       stepB <- sb.data
     } yield Step((stepA.value, stepB.value), stepA.rest zip stepB.rest)
   }
+
+  def zipWithIndex(implicit app: Applicative[AsyncStream[F, ?]]): AsyncStream[F, (A, Int)] =
+    zip(AsyncStream.unfold(0)(_ + 1))
 }
 
 object AsyncStream {
   private[asyncstreams] def apply[F[+_]: Monad, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] = new AsyncStream(data)
   def asyncNil[F[+_]: Monad, A](implicit impl: ASImpl[F]): AsyncStream[F, A] = impl.empty
 
-  private[asyncstreams] def generate[F[+_]: Monad, S, A](start: S)(gen: S => F[(S, A)])(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, A] = AsyncStream {
+  private[asyncstreams] def generate[F[+_]: Monad, S, A](start: S)(gen: S => F[(S, A)])(implicit smp: Applicative[AsyncStream[F, ?]]): AsyncStream[F, A] = AsyncStream {
     gen(start).map((stateEl: (S, A)) => Step(stateEl._2, generate(stateEl._1)(gen)))
   }
 
-  def unfold[F[+_]: Monad, T](start: T)(makeNext: T => T)(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] =
+  def unfold[F[+_]: Monad, T](start: T)(makeNext: T => T)(implicit smp: Applicative[AsyncStream[F, ?]]): AsyncStream[F, T] =
     generate(start)(s => (makeNext(s), s).pure[F])
 
-  def unfoldM[F[+_]: Monad, T](start: T)(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] =
+  def unfoldM[F[+_]: Monad, T](start: T)(makeNext: T => F[T])(implicit alt: Applicative[AsyncStream[F, ?]]): AsyncStream[F, T] =
     generate(start)(s => makeNext(s).map(n => (n, s)))
 
-  def unfoldMM[F[+_]: Monad, T](start: F[T])(makeNext: T => F[T])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, T] = AsyncStream {
+  def unfoldMM[F[+_]: Monad, T](start: F[T])(makeNext: T => F[T])(implicit alt: Applicative[AsyncStream[F, ?]]): AsyncStream[F, T] = AsyncStream {
     start.flatMap(initial => generate(initial)(s => makeNext(s).map(n => (n, s))).data)
   }
 }
