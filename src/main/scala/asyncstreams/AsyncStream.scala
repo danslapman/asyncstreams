@@ -85,6 +85,9 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
 
   def zipWithIndex(implicit app: Applicative[AsyncStream[F, ?]]): AsyncStream[F, (A, Int)] =
     zip(AsyncStream.unfold(0)(_ + 1))
+
+  def foldLeft[B](init: B)(fold: (B, A) => B)(implicit impl: ASImpl[F]): F[B] =
+    impl.collectLeft(this)(init)(fold)
 }
 
 object AsyncStream {
