@@ -122,4 +122,13 @@ class AsyncStreamOperations extends FunSuite with Matchers {
 
     await(res) shouldBe 465
   }
+
+  test("zip") {
+    val s1 = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
+    val s2 = 4 ~:: 5 ~:: AsyncStream.asyncNil[Future, Int]
+
+    val res = s1 zip s2
+
+    await(res.to[List]) shouldBe (1, 4) :: (2, 5) :: Nil
+  }
 }

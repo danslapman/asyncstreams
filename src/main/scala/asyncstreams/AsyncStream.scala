@@ -75,6 +75,13 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
   def foldMap[B](f: A => B)(implicit impl: ASImpl[F], mb: Monoid[B]): F[B] = {
     impl.collectLeft(this)(mb.empty)((b, a) => mb.combine(b, f(a)))
   }
+
+  def zip[B](sb: AsyncStream[F, B]): AsyncStream[F, (A, B)] = AsyncStream {
+    for {
+      stepA <- data
+      stepB <- sb.data
+    } yield Step((stepA.value, stepB.value), stepA.rest zip stepB.rest)
+  }
 }
 
 object AsyncStream {
