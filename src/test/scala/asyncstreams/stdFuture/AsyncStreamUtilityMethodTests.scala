@@ -1,7 +1,6 @@
 package asyncstreams.stdFuture
 
 import asyncstreams._
-import asyncstreams.impl._
 import cats.instances.future._
 import org.scalatest.{FunSuite, Matchers}
 

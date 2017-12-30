@@ -1,7 +1,6 @@
 package asyncstreams.twitterFuture
 
 import asyncstreams._
-import asyncstreams.impl._
 import asyncstreams.{ASImpl, AsyncStream}
 import cats.syntax.flatMap._
 import cats.syntax.functor._

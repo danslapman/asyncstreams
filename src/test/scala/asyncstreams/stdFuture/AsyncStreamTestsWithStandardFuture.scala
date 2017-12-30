@@ -3,7 +3,6 @@ package asyncstreams.stdFuture
 import java.util.concurrent.Executors
 
 import asyncstreams._
-import asyncstreams.impl._
 import asyncstreams.{ASImpl, AsyncStream}
 import cats.Monad
 import cats.instances.future._

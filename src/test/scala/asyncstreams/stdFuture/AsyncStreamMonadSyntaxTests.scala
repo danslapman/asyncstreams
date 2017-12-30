@@ -1,7 +1,6 @@
 package asyncstreams.stdFuture
 
 import asyncstreams._
-import asyncstreams.impl._
 import asyncstreams.statet._
 import cats.instances.future._
 import cats.mtl.instances.state._
