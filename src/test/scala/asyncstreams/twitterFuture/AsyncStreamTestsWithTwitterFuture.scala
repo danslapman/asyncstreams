@@ -1,19 +1,20 @@
 package asyncstreams.twitterFuture
 
-import asyncstreams.Utils._
+import asyncstreams._
+import asyncstreams.impl._
 import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.MonadErrorInstances._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.semigroupk._
 import com.twitter.util.{Await, Future}
 import io.catbird.util.FutureInstances
 import org.scalatest.{FunSuite, Matchers}
-import harmony.toscalaz.typeclass.MonadErrorConverter._
 
 import scala.collection.mutable.ArrayBuffer
-import scalaz.syntax.monadPlus._
 
 class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with FutureInstances {
   private def wait[T](f: Future[T]): T = Await.result(f)
-  private def makeInfStream = AsyncStream.unfold(0)(_ + 1)
+  private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
 
   test("composition operator") {
     val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
@@ -27,15 +28,15 @@ class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with Futu
   }
 
   test("concatenation") {
-    val s1 = List(0, 1).toAS
-    val s2 = List(2, 3).toAS
+    val s1 = List(0, 1).toAS[Future]
+    val s2 = List(2, 3).toAS[Future]
     val f = s1 <+> s2
     wait(f.to[List]) shouldBe List(0, 1, 2, 3)
   }
 
   test("working as monad") {
-    val s1 = List(0, 1).toAS
-    val s2 = List(2, 3).toAS
+    val s1 = List(0, 1).toAS[Future]
+    val s2 = List(2, 3).toAS[Future]
 
     val res = for {
       v1 <- s1
@@ -77,7 +78,7 @@ class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with Futu
   }
 
   test("flatten") {
-    val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS
+    val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS[Future]
     val flatStream = stream.flatten
     wait(flatStream.to[Vector]) shouldBe Vector.range(0, 1000000)
   }

@@ -2,25 +2,28 @@ package asyncstreams.stdFuture
 
 import java.util.concurrent.Executors
 
-import asyncstreams.Utils._
+import asyncstreams._
+import asyncstreams.impl._
 import asyncstreams.{ASImpl, AsyncStream}
-import asyncstreams.Implicits.MonadErrorInstances._
+import cats.Monad
+import cats.instances.future._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.semigroupk._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scalaz.std.scalaFuture._
-import scalaz.syntax.monadPlus._
 
 class AsyncStreamTestsWithStandardFuture extends FunSuite with Matchers {
   private implicit val executor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
-  private def makeInfStream = AsyncStream.unfold(0)(_ + 1)
+  private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
   private def wait[T](f: Future[T], d: FiniteDuration = 5.seconds): T = Await.result(f, d)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil
+    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
     wait(s.to[List]) shouldBe List(1, 2, 3)
   }
 
@@ -31,15 +34,15 @@ class AsyncStreamTestsWithStandardFuture extends FunSuite with Matchers {
   }
 
   test("concatenation") {
-    val s1 = List(0, 1).toAS
-    val s2 = List(2, 3).toAS
+    val s1 = List(0, 1).toAS[Future]
+    val s2 = List(2, 3).toAS[Future]
     val f = s1 <+> s2
     wait(f.to[List]) shouldBe List(0, 1, 2, 3)
   }
 
   test("working as monad") {
-    val s1 = List(0, 1).toAS
-    val s2 = List(2, 3).toAS
+    val s1 = List(0, 1).toAS[Future]
+    val s2 = List(2, 3).toAS[Future]
 
     val res = for {
       v1 <- s1
@@ -81,7 +84,7 @@ class AsyncStreamTestsWithStandardFuture extends FunSuite with Matchers {
   }
 
   test("flatten") {
-    val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS
+    val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS[Future]
     val flatStream = stream.flatten
     wait(flatStream.to[Vector], 20.seconds) shouldBe Vector.range(0, 1000000)
   }
