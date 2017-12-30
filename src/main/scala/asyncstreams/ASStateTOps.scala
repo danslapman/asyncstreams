@@ -35,6 +35,6 @@ class ASStateTOps[F[+_]: Monad](implicit methods: ASImpl[F]) {
     stream.data.map(step => (s, (step.rest, step.value)))
   }
 
-  def genS[S, A](start: S)(gen: StateT[F, S, A])(implicit smp: Alternative[AsyncStream[F, ?]]): AsyncStream[F, A] =
+  def genS[S, A](start: S)(gen: StateT[F, S, A])(implicit alt: Alternative[AsyncStream[F, ?]]): AsyncStream[F, A] =
     AsyncStream.generate(start)(gen.run)
 }

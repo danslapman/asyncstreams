@@ -19,8 +19,8 @@ trait ASImpl[F[+_]] {
   def findF[T](s: AsyncStream[F, T], p: T => F[Boolean]): F[Option[T]]
 }
 
-class ASImplForMonadError[F[+_]](implicit fmp: MonadError[F, Throwable], ze: EmptyK[F]) extends ASImpl[F] {
-  override def empty[A]: AsyncStream[F, A] = AsyncStream(ze.empty)
+class ASImplForMonadError[F[+_]](implicit fme: MonadError[F, Throwable], zk: EmptyK[F]) extends ASImpl[F] {
+  override def empty[A]: AsyncStream[F, A] = AsyncStream(zk.empty)
 
   override def collectLeft[A, B](s: AsyncStream[F, A])(init: B)(f: (B, A) => B): F[B] = {
     def impl(d: F[Step[A, AsyncStream[F, A]]], acc: F[B]): F[B] =
@@ -30,12 +30,12 @@ class ASImplForMonadError[F[+_]](implicit fmp: MonadError[F, Throwable], ze: Emp
   }
 
   override def fromIterable[T](it: Iterable[T]): AsyncStream[F, T] = AsyncStream {
-    if (it.nonEmpty) Step(it.head, fromIterable(it.tail)).pure[F] else ze.empty
+    if (it.nonEmpty) Step(it.head, fromIterable(it.tail)).pure[F] else zk.empty
   }
 
   override def takeWhile[T](s: AsyncStream[F, T])(p: (T) => Boolean): AsyncStream[F, T] = AsyncStream {
     s.data.flatMap {
-      case step if !p(step.value) => ze.empty
+      case step if !p(step.value) => zk.empty
       case step => Step(step.value, takeWhile(step.rest)(p)).pure[F]
     }
   }
