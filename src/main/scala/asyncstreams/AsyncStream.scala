@@ -5,6 +5,7 @@ import cats.{Alternative, Applicative, Monad}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.semigroup._
 import cats.syntax.semigroupk._
 
 import scala.annotation.unchecked.{uncheckedVariance => uV}
@@ -73,7 +74,7 @@ class AsyncStream[F[+_]: Monad, +A](private[asyncstreams] val data: F[Step[A, As
   def partition(p: A => Boolean): (AsyncStream[F, A], AsyncStream[F, A]) = (filter(p), filter(p.andThen(!_)))
 
   def foldMap[B](f: A => B)(implicit impl: ASImpl[F], mb: Monoid[B]): F[B] = {
-    impl.collectLeft(this)(mb.empty)((b, a) => mb.combine(b, f(a)))
+    impl.collectLeft(this)(mb.empty)((b, a) => b |+| f(a))
   }
 
   def zip[B](sb: AsyncStream[F, B]): AsyncStream[F, (A, B)] = AsyncStream {
