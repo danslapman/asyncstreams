@@ -28,7 +28,7 @@ asyncstreams is available via bintray:
 ```
     resolvers += Resolver.bintrayRepo("danslapman", "maven")
 
-    libraryDependencies += "danslapman" %% "asyncstreams" % "1.0-rc1"
+    libraryDependencies += "danslapman" %% "asyncstreams" % "1.0"
 ```
 
 asyncstreams initially based on [scala-async](https://github.com/iboltaev/scala-async) ideas.
