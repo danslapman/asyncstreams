@@ -22,6 +22,7 @@ asyncstreams is tested to work with:
 - standard scala futures
 - twitter futures
 - monix tasks
+- cats-effect IO
 
 asyncstreams is available via bintray:
 

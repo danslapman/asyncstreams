@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % versions("cats"),
   "org.typelevel" %% "alleycats-core" % versions("cats"),
   "org.typelevel" %% "cats-mtl-core" % "0.2.3",
+  "org.typelevel" %% "cats-effect" % "0.10" % Test,
   "io.monix" %% "monix-eval" % versions("monix") % Test,
   "com.twitter" %% "util-core" % "18.3.0" % Test,
   "io.catbird" %% "catbird-util" % "18.3.0" % Test,
