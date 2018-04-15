@@ -5,17 +5,13 @@ import asyncstreams.statet._
 import cats.instances.future._
 import cats.mtl.instances.state._
 import cats.mtl.syntax.empty._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
-class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
+class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers {
   private val ftInstance = asStateTOps[Future]
   import ftInstance._
-
-  private def wait[T](f: Future[T], d: Duration = 5.seconds): T = Await.result(f, d)
 
   test("foreach") {
     val ms = stateState[Future, Int]
@@ -27,7 +23,7 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
       v2 <- ms.get
     } yield v2
 
-    wait(fstate.run(0)) shouldBe (6, 6)
+    fstate.run(0).map(_ shouldBe (6, 6))
   }
 
   /*
@@ -61,7 +57,7 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
       } yield s
     } take 3
 
-    wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
+    stream.to[List].map(_ shouldBe (0 :: 1 :: 2 :: Nil))
   }
 
   test("Generate finite stream") {
@@ -75,6 +71,6 @@ class AsyncStreamMonadSyntaxTests extends FunSuite with Matchers {
       } yield s
     }
 
-    wait(stream.to[List]) shouldBe (0 :: 1 :: 2 :: Nil)
+    stream.to[List].map(_ shouldBe (0 :: 1 :: 2 :: Nil))
   }
 }
