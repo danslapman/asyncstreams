@@ -12,7 +12,7 @@ package object asyncstreams {
   }
 
   implicit class IterableToAS[T](it: Iterable[T]) {
-    def toAS[F[+_]: Monad](implicit methods: ASImpl[F]): AsyncStream[F, T] = methods.fromIterable(it)
+    def toAS[F[_]: Monad](implicit methods: ASImpl[F]): AsyncStream[F, T] = methods.fromIterable(it)
   }
 
   implicit class FunctorEmptyWithFilter[F[_] : FunctorEmpty, A](fa: F[A]) {
