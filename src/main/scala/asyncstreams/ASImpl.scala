@@ -6,10 +6,11 @@ import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.option._
 
 import scala.language.higherKinds
 
-trait ASImpl[F[+_]] {
+trait ASImpl[F[_]] {
   def empty[A]: AsyncStream[F, A]
   def collectLeft[A, B](s: AsyncStream[F, A])(init: B)(f: (B, A) => B): F[B]
   def fromIterable[T](it: Iterable[T]): AsyncStream[F, T]
@@ -19,7 +20,7 @@ trait ASImpl[F[+_]] {
   def findF[T](s: AsyncStream[F, T], p: T => F[Boolean]): F[Option[T]]
 }
 
-class ASImplForMonadError[F[+_]](implicit fme: MonadError[F, Throwable], zk: EmptyK[F]) extends ASImpl[F] {
+class ASImplForMonadError[F[_]](implicit fme: MonadError[F, Throwable], zk: EmptyK[F]) extends ASImpl[F] {
   override def empty[A]: AsyncStream[F, A] = AsyncStream(zk.empty)
 
   override def collectLeft[A, B](s: AsyncStream[F, A])(init: B)(f: (B, A) => B): F[B] = {
@@ -44,17 +45,17 @@ class ASImplForMonadError[F[+_]](implicit fme: MonadError[F, Throwable], zk: Emp
 
   override def find[T](s: AsyncStream[F, T], p: T => Boolean): F[Option[T]] = {
     s.data.flatMap { s =>
-      if (p(s.value)) Some(s.value).pure[F]
+      if (p(s.value)) s.value.some.pure[F]
       else find(s.rest, p)
-    }.handleErrorWith(_ => None.pure[F])
+    }.handleErrorWith(_ => none.pure[F])
   }
 
   override def findF[T](s: AsyncStream[F, T], p: T => F[Boolean]): F[Option[T]] = {
     s.data.flatMap { s =>
       p(s.value).flatMap {
-        case true => Some(s.value).pure[F]
+        case true => s.value.some.pure[F]
         case false => findF(s.rest, p)
       }
-    }.handleErrorWith(_ => None.pure[F])
+    }.handleErrorWith(_ => none.pure[F])
   }
 }

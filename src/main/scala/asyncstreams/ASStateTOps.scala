@@ -9,7 +9,7 @@ import cats.syntax.functor._
 
 import scala.language.higherKinds
 
-class ASStateTOps[F[+_]: Monad](implicit methods: ASImpl[F]) {
+class ASStateTOps[F[_]: Monad](implicit methods: ASImpl[F]) {
   def foreach[A, S](stream: AsyncStream[F, A])(f: A => StateT[F, S, _]): StateT[F, S, Unit] = StateT { s =>
     methods.collectLeft(stream)(s.pure[F])((fS, a) => fS.flatMap(s2 => f(a).run(s2).map(_._1)))
       .flatMap(identity).map((_, ()))

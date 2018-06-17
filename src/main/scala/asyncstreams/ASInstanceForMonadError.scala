@@ -9,7 +9,7 @@ import cats.syntax.functor._
 
 import scala.language.higherKinds
 
-class ASInstanceForMonadError[F[+_]](implicit fme: MonadError[F, Throwable], zk: EmptyK[F]) extends Monad[AsyncStream[F, ?]] with Alternative[AsyncStream[F, ?]] with StackSafeMonad[AsyncStream[F, ?]] {
+class ASInstanceForMonadError[F[_]](implicit fme: MonadError[F, Throwable], zk: EmptyK[F]) extends Monad[AsyncStream[F, ?]] with Alternative[AsyncStream[F, ?]] with StackSafeMonad[AsyncStream[F, ?]] {
   override def empty[A] = AsyncStream(zk.empty)
 
   override def combineK[A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
