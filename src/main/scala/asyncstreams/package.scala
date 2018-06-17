@@ -15,7 +15,7 @@ package object asyncstreams {
     def toAS[F[+_]: Monad](implicit methods: ASImpl[F]): AsyncStream[F, T] = methods.fromIterable(it)
   }
 
-  implicit class FunctorWithFilter[F[_] : FunctorEmpty, A](fa: F[A]) {
+  implicit class FunctorEmptyWithFilter[F[_] : FunctorEmpty, A](fa: F[A]) {
     def withFilter(f: A => Boolean): F[A] = fa.filter(f)
   }
 
