@@ -7,7 +7,7 @@ import cats.syntax.applicative._
 import scala.language.higherKinds
 
 package object asyncstreams {
-  implicit class AsyncStreamOps[F[+_]: Monad, A](stream: => AsyncStream[F, A]) {
+  implicit class AsyncStreamOps[F[_]: Monad, A](stream: => AsyncStream[F, A]) {
     def ~::(el: A) = AsyncStream(Step(el, stream).pure[F])
   }
 
