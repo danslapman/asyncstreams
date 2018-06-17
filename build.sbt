@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-effect" % "1.0.0-RC2" % Test,
   "io.monix" %% "monix-eval" % versions("monix") % Test,
   "com.twitter" %% "util-core" % versions("twitter") % Test,
-  "io.catbird" %% "catbird-util" % "versions("twitter") % Test,
+  "io.catbird" %% "catbird-util" % versions("twitter") % Test,
   "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
