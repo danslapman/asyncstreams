@@ -2,7 +2,7 @@ name := "asyncstreams"
 
 organization := "danslapman"
 
-version := "1.0.1"
+version := "2.0.0-SNAPSHOT"
 
 scalaVersion := "2.12.6"
 
@@ -16,18 +16,19 @@ addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
 
 val versions = Map(
   "monix" -> "3.0.0-RC1",
-  "cats" -> "1.0.0"
+  "cats" -> "1.1.0",
+  "twitter" -> "18.6.0"
 )
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % versions("cats"),
   "org.typelevel" %% "alleycats-core" % versions("cats"),
-  "org.typelevel" %% "cats-mtl-core" % "0.2.3",
-  "org.typelevel" %% "cats-effect" % "0.10" % Test,
+  "org.typelevel" %% "cats-mtl-core" % "0.3.0",
+  "org.typelevel" %% "cats-effect" % "1.0.0-RC2" % Test,
   "io.monix" %% "monix-eval" % versions("monix") % Test,
-  "com.twitter" %% "util-core" % "18.3.0" % Test,
-  "io.catbird" %% "catbird-util" % "18.3.0" % Test,
-  "org.scalatest" %% "scalatest" % "3.0.4" % Test
+  "com.twitter" %% "util-core" % versions("twitter") % Test,
+  "io.catbird" %% "catbird-util" % "versions("twitter") % Test,
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
 licenses += ("WTFPL", url("http://www.wtfpl.net"))
