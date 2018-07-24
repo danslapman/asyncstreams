@@ -34,7 +34,7 @@ class ASImplForMonadError[F[_]](implicit fme: MonadError[F, Throwable], zk: Empt
     if (it.nonEmpty) Step(it.head, fromIterable(it.tail)).pure[F] else zk.empty
   }
 
-  override def takeWhile[T](s: AsyncStream[F, T])(p: (T) => Boolean): AsyncStream[F, T] = AsyncStream {
+  override def takeWhile[T](s: AsyncStream[F, T])(p: T => Boolean): AsyncStream[F, T] = AsyncStream {
     s.data.flatMap {
       case step if !p(step.value) => zk.empty
       case step => Step(step.value, takeWhile(step.rest)(p)).pure[F]

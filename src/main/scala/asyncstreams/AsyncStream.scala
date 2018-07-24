@@ -31,10 +31,10 @@ class AsyncStream[F[_]: Monad, A](private[asyncstreams] val data: F[Step[A, Asyn
       data.flatMap(p => p.rest.drop(n - 1).data)
     }
 
-  def foreach[U](f: (A) => U)(implicit impl: ASImpl[F]): F[Unit] =
+  def foreach[U](f: A => U)(implicit impl: ASImpl[F]): F[Unit] =
     impl.collectLeft(this)(())((_: Unit, a: A) => {f(a); ()})
 
-  def foreachF[U](f: (A) => F[U])(implicit impl: ASImpl[F]): F[Unit] =
+  def foreachF[U](f: A => F[U])(implicit impl: ASImpl[F]): F[Unit] =
     impl.collectLeft(this)(().pure[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(identity)
 
   def flatten[B](implicit asIterable: A => GenIterable[B], alt: Alternative[AsyncStream[F, ?]], impl: ASImpl[F]): AsyncStream[F, B] = {
