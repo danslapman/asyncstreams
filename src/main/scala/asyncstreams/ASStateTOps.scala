@@ -9,9 +9,9 @@ import cats.syntax.functor._
 
 import scala.language.higherKinds
 
-class ASStateTOps[F[_]: Monad](implicit methods: ASImpl[F]) {
+class ASStateTOps[F[_]: Monad: EmptyKOrElse] {
   def foreach[A, S](stream: AsyncStream[F, A])(f: A => StateT[F, S, _]): StateT[F, S, Unit] = StateT { s =>
-    methods.collectLeft(stream)(s.pure[F])((fS, a) => fS.flatMap(s2 => f(a).run(s2).map(_._1)))
+    stream.foldLeft(s.pure[F])((fS, a) => fS.flatMap(s2 => f(a).run(s2).map(_._1)))
       .flatMap(identity).map((_, ()))
   }
 
@@ -35,6 +35,6 @@ class ASStateTOps[F[_]: Monad](implicit methods: ASImpl[F]) {
     stream.data.map(step => (s, (step.rest, step.value)))
   }
 
-  def genS[S, A](start: S)(gen: StateT[F, S, A])(implicit app: Applicative[AsyncStream[F, ?]]): AsyncStream[F, A] =
+  def genS[S, A](start: S)(gen: StateT[F, S, A]): AsyncStream[F, A] =
     AsyncStream.generate(start)(gen.run)
 }
