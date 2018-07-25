@@ -1,13 +1,18 @@
 package asyncstreams.stdFuture
 
-/*
+import java.util.concurrent.Executors
+
 import asyncstreams._
+import asyncstreams.instances._
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers {
+  override implicit def executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+
   test("unfold") {
     val as = AsyncStream.unfold[Future, Int](0)(_ + 1).take(20)
 
@@ -26,4 +31,3 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers {
     as.to[Vector].map(_ shouldBe Vector.range(0, 20))
   }
 }
-*/

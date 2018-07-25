@@ -1,6 +1,7 @@
-package asyncstreams
+package asyncstreams.ops
 
-import cats.{Applicative, Monad}
+import asyncstreams.{AsyncStream, EmptyKOrElse}
+import cats.Monad
 import cats.data.StateT
 import cats.mtl.MonadState
 import cats.syntax.applicative._
@@ -9,7 +10,7 @@ import cats.syntax.functor._
 
 import scala.language.higherKinds
 
-class ASStateTOps[F[_]: Monad: EmptyKOrElse] {
+class StateTOps[F[_]: Monad: EmptyKOrElse] {
   def foreach[A, S](stream: AsyncStream[F, A])(f: A => StateT[F, S, _]): StateT[F, S, Unit] = StateT { s =>
     stream.foldLeft(s.pure[F])((fS, a) => fS.flatMap(s2 => f(a).run(s2).map(_._1)))
       .flatMap(identity).map((_, ()))
@@ -37,4 +38,8 @@ class ASStateTOps[F[_]: Monad: EmptyKOrElse] {
 
   def genS[S, A](start: S)(gen: StateT[F, S, A]): AsyncStream[F, A] =
     AsyncStream.generate(start)(gen.run)
+}
+
+object StateTOps {
+  def apply[F[_]: Monad: EmptyKOrElse] = new StateTOps[F]
 }

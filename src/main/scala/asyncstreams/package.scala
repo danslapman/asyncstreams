@@ -2,7 +2,6 @@ import cats.{Monad, MonadError}
 import cats.mtl.FunctorEmpty
 import cats.mtl.syntax.empty._
 import cats.syntax.applicative._
-import cats.syntax.applicativeError._
 
 import scala.concurrent.Future
 import scala.language.higherKinds
