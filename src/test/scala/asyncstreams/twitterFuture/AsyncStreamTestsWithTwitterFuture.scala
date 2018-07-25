@@ -1,5 +1,6 @@
 package asyncstreams.twitterFuture
 
+/*
 import asyncstreams._
 import asyncstreams.{ASImpl, AsyncStream}
 import cats.syntax.flatMap._
@@ -82,3 +83,4 @@ class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with Futu
     wait(flatStream.to[Vector]) shouldBe Vector.range(0, 1000000)
   }
 }
+*/

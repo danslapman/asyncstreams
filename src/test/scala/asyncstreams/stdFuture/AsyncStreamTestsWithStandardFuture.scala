@@ -1,5 +1,6 @@
 package asyncstreams.stdFuture
 
+/*
 import java.util.concurrent.Executors
 
 import asyncstreams._
@@ -87,3 +88,4 @@ class AsyncStreamTestsWithStandardFuture extends AsyncFunSuite with Matchers {
     flatStream.to[Vector].map(_ shouldBe Vector.range(0, 1000000))
   }
 }
+*/

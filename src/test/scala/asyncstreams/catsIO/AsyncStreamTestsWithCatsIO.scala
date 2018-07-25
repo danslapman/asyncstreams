@@ -1,5 +1,6 @@
 package asyncstreams.catsIO
 
+/*
 import asyncstreams._
 import cats.effect.IO
 import cats.effect.IO._
@@ -80,3 +81,5 @@ class AsyncStreamTestsWithCatsIO extends AsyncFunSuite with Matchers {
     flatStream.to[Vector].unsafeToFuture().map(_ shouldBe Vector.range(0, 1000000))
   }
 }
+
+*/

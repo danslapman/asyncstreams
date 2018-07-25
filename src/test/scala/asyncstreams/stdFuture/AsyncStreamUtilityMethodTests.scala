@@ -1,5 +1,6 @@
 package asyncstreams.stdFuture
 
+/*
 import asyncstreams._
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}
@@ -25,3 +26,4 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers {
     as.to[Vector].map(_ shouldBe Vector.range(0, 20))
   }
 }
+*/

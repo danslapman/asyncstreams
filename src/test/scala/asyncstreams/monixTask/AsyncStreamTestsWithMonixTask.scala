@@ -1,5 +1,6 @@
 package asyncstreams.monixTask
 
+/*
 import asyncstreams._
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
@@ -84,3 +85,4 @@ class AsyncStreamTestsWithMonixTask extends FunSuite with Matchers {
     flatStream.to[Vector].runAsync.map(_ shouldBe Vector.range(0, 1000000))
   }
 }
+*/

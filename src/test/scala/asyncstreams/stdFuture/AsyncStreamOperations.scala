@@ -1,14 +1,20 @@
 package asyncstreams.stdFuture
 
+import java.util.concurrent.Executors
+
 import asyncstreams._
+import asyncstreams.instances._
 import cats.instances.int._
 import cats.instances.future._
 import cats.syntax.applicative._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AsyncStreamOperations extends AsyncFunSuite with Matchers {
+  override implicit def executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+
   private def stream = (0 to 30).toAS[Future]
   private def longStream = AsyncStream.unfold[Future, Int](0)(_ + 1).take(100000)
 

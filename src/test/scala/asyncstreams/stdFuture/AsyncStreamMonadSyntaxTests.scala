@@ -1,5 +1,6 @@
 package asyncstreams.stdFuture
 
+/*
 import asyncstreams._
 import asyncstreams.statet._
 import cats.instances.future._
@@ -74,3 +75,4 @@ class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers {
     stream.to[List].map(_ shouldBe (0 :: 1 :: 2 :: Nil))
   }
 }
+*/

@@ -20,9 +20,10 @@ package object asyncstreams {
     def withFilter(f: A => Boolean): F[A] = fa.filter(f)
   }
 
-  implicit def futureEmptyKOrElse(implicit me: MonadError[Future, NoSuchElementException]): EmptyKOrElse[Future] = new EmptyKOrElse[Future] {
+  implicit def futureEmptyKOrElse(implicit me: MonadError[Future, Throwable]): EmptyKOrElse[Future] = new EmptyKOrElse[Future] {
     override def empty[A]: Future[A] = me.raiseError(new NoSuchElementException)
 
-    override def orElse[A](fa: Future[A], default: => Future[A]): Future[A] = fa.handleErrorWith(_ => default)
+    override def orElse[A](fa: Future[A], default: => Future[A]): Future[A] =
+      me.recoverWith(fa) { case _: NoSuchElementException  => default }
   }
 }

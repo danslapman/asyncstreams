@@ -1,6 +1,9 @@
 package asyncstreams
 
+import alleycats.EmptyK
 import cats._
+import cats.data.StateT
+import cats.mtl.FunctorEmpty
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -22,5 +25,22 @@ package object instances {
       override def flatMap[A, B](fa: AsyncStream[F, A])(f: A => AsyncStream[F, B]): AsyncStream[F, B] = AsyncStream {
         fa.data.flatMap(step => f(step.value).data.map(step2 => Step(step2.value, combineK(step2.rest, flatMap(step.rest)(f)))))
       }
+    }
+
+  implicit def stateTFunctorEmpty[F[_], S](implicit functor: Functor[StateT[F, S, ?]], mf: Monad[F], emptyk: EmptyK[F]): FunctorEmpty[StateT[F, S, ?]] =
+    new FunctorEmpty[StateT[F, S, ?]] {
+      override def mapFilter[A, B](fa: StateT[F, S, A])(f: A => Option[B]): StateT[F, S, B] =
+        collect(fa.map(f)) { case Some(e) => e }
+
+      override def collect[A, B](fa: StateT[F, S, A])(f: PartialFunction[A, B]): StateT[F, S, B] =
+        fa.flatMapF(a => if (f.isDefinedAt(a)) f(a).pure[F] else emptyk.empty)
+
+      override def flattenOption[A](fa: StateT[F, S, Option[A]]): StateT[F, S, A] =
+        collect(fa) { case Some(e) => e }
+
+      override def filter[A](fa: StateT[F, S, A])(f: A => Boolean): StateT[F, S, A] =
+        fa.flatMapF(a => if(f(a)) a.pure[F] else emptyk.empty)
+
+      override val functor: Functor[StateT[F, S, ?]] = functor
     }
 }
