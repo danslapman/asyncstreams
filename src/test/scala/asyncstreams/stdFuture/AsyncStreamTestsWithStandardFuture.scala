@@ -1,14 +1,10 @@
 package asyncstreams.stdFuture
 
-/*
 import java.util.concurrent.Executors
 
 import asyncstreams._
-import asyncstreams.{ASImpl, AsyncStream}
-import cats.Monad
+import asyncstreams.instances._
 import cats.instances.future._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import cats.syntax.semigroupk._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
@@ -17,7 +13,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 class AsyncStreamTestsWithStandardFuture extends AsyncFunSuite with Matchers {
-  override implicit def executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+  override implicit def executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
 
@@ -28,7 +25,7 @@ class AsyncStreamTestsWithStandardFuture extends AsyncFunSuite with Matchers {
 
   test("foldLeft") {
     val s2 = List(2, 3).toAS[Future]
-    val f = implicitly[ASImpl[Future]].collectLeft(s2)(List[Int]())((list, el) => el :: list)
+    val f = s2.foldLeft(List[Int]())((list, el) => el :: list)
     f.map(_ shouldBe List(3, 2))
   }
 
@@ -88,4 +85,3 @@ class AsyncStreamTestsWithStandardFuture extends AsyncFunSuite with Matchers {
     flatStream.to[Vector].map(_ shouldBe Vector.range(0, 1000000))
   }
 }
-*/

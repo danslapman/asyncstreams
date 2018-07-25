@@ -27,7 +27,7 @@ package object instances {
       }
     }
 
-  implicit def stateTFunctorEmpty[F[_], S](implicit functor: Functor[StateT[F, S, ?]], mf: Monad[F], emptyk: EmptyK[F]): FunctorEmpty[StateT[F, S, ?]] =
+  implicit def stateTFunctorEmpty[F[_], S](implicit fst: Functor[StateT[F, S, ?]], mf: Monad[F], emptyk: EmptyK[F]): FunctorEmpty[StateT[F, S, ?]] =
     new FunctorEmpty[StateT[F, S, ?]] {
       override def mapFilter[A, B](fa: StateT[F, S, A])(f: A => Option[B]): StateT[F, S, B] =
         collect(fa.map(f)) { case Some(e) => e }
@@ -41,6 +41,6 @@ package object instances {
       override def filter[A](fa: StateT[F, S, A])(f: A => Boolean): StateT[F, S, A] =
         fa.flatMapF(a => if(f(a)) a.pure[F] else emptyk.empty)
 
-      override val functor: Functor[StateT[F, S, ?]] = functor
+      override val functor: Functor[StateT[F, S, ?]] = fst
     }
 }
