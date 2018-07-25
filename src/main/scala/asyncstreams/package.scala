@@ -3,7 +3,9 @@ import cats.{Alternative, Monad, MonadError}
 import cats.mtl.FunctorEmpty
 import cats.mtl.syntax.empty._
 import cats.syntax.applicative._
+import cats.syntax.applicativeError._
 
+import scala.concurrent.Future
 import scala.language.higherKinds
 
 package object asyncstreams {
@@ -24,5 +26,11 @@ package object asyncstreams {
   implicit def asimpl[F[_]: MonadError[?[_], Throwable]]: ASImpl[F] = new ASImplForMonadError[F]
   implicit def zeroK[F[_]](implicit me: MonadError[F, Throwable]): EmptyK[F] = new EmptyK[F] {
     override def empty[A]: F[A] = me.raiseError(new NoSuchElementException)
+  }
+
+  implicit def futureEmptyKOrElse(implicit me: MonadError[Future, NoSuchElementException]): EmptyKOrElse[Future] = new EmptyKOrElse[Future] {
+    override def empty[A]: Future[A] = me.raiseError(new NoSuchElementException)
+
+    override def orElse[A](fa: Future[A], default: => Future[A]): Future[A] = fa.handleErrorWith(_ => default)
   }
 }
