@@ -12,7 +12,9 @@ scalacOptions += "-Ypartial-unification"
 
 parallelExecution in ThisBuild := false
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7")
+
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
 
 val versions = Map(
   "monix" -> "3.0.0-RC1",
