@@ -3,7 +3,7 @@ val versions = Map(
   "twitter" -> "18.7.0"
 )
 
-lazy val asyncstreams = (project in file("core"))
+lazy val root = (project in file("core"))
   .aggregate(`asyncstreams-twitter`)
   .settings(Settings.common)
   .settings(
@@ -18,7 +18,7 @@ lazy val asyncstreams = (project in file("core"))
     )
   )
 
-lazy val asyncstreamsRef = LocalProject("asyncstreams")
+lazy val asyncstreamsRef = LocalProject("root")
 
 lazy val `asyncstreams-twitter` = (project in file("twitter"))
   .dependsOn(asyncstreamsRef)
