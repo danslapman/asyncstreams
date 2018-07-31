@@ -21,15 +21,12 @@ See more examples in tests.
 asyncstreams is tested to work with:
 - standard scala futures
 - twitter futures
-- monix tasks
-- cats-effect IO
+- any other effect for which EmptyKOrElse can be implemented
 
 asyncstreams is available via bintray:
 
 ```
     resolvers += Resolver.bintrayRepo("danslapman", "maven")
 
-    libraryDependencies += "danslapman" %% "asyncstreams" % "1.0.1"
+    libraryDependencies += "danslapman" %% "asyncstreams" % "2.0.0"
 ```
-
-asyncstreams initially based on [scala-async](https://github.com/iboltaev/scala-async) ideas.

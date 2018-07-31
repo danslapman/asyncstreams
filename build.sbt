@@ -1,37 +1,43 @@
-name := "asyncstreams"
-
-organization := "danslapman"
-
-version := "1.0.1"
-
-scalaVersion := "2.12.6"
-
-crossScalaVersions := Seq("2.11.12", "2.12.6")
-
-scalacOptions += "-Ypartial-unification"
-
-parallelExecution in ThisBuild := false
-
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
-
 val versions = Map(
-  "monix" -> "3.0.0-RC1",
-  "cats" -> "1.0.0"
+  "cats" -> "1.2.0",
+  "twitter" -> "18.7.0"
 )
 
-libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % versions("cats"),
-  "org.typelevel" %% "alleycats-core" % versions("cats"),
-  "org.typelevel" %% "cats-mtl-core" % "0.2.3",
-  "org.typelevel" %% "cats-effect" % "0.10" % Test,
-  "io.monix" %% "monix-eval" % versions("monix") % Test,
-  "com.twitter" %% "util-core" % "18.3.0" % Test,
-  "io.catbird" %% "catbird-util" % "18.3.0" % Test,
-  "org.scalatest" %% "scalatest" % "3.0.4" % Test
-)
+lazy val asyncstreams = (project in file("core"))
+  .aggregate(`asyncstreams-twitter`)
+  .settings(Settings.common)
+  .settings(
+    name := "asyncstreams",
+    parallelExecution in ThisBuild := false,
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % versions("cats"),
+      "org.typelevel" %% "alleycats-core" % versions("cats"),
+      "org.typelevel" %% "cats-mtl-core" % "0.3.0",
+      "com.github.mpilquist" %% "simulacrum" % "0.13.0",
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    )
+  )
 
-licenses += ("WTFPL", url("http://www.wtfpl.net"))
+lazy val asyncstreamsRef = LocalProject("asyncstreams")
 
-bintrayOrganization := Some("danslapman")
+lazy val `asyncstreams-twitter` = (project in file("twitter"))
+  .dependsOn(asyncstreamsRef)
+  .settings(Settings.common)
+  .settings(
+    name := "asyncstreams-twitter",
+    parallelExecution in ThisBuild := false,
+    libraryDependencies ++= Seq(
+      "com.twitter" %% "util-core" % versions("twitter"),
+      "io.catbird" %% "catbird-util" % versions("twitter") % Test,
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    )
+  )
 
-bintrayReleaseOnPublish in ThisBuild := false
+lazy val root = (project in file("."))
+  .dependsOn(asyncstreams, `asyncstreams-twitter`)
+  .aggregate(asyncstreams, `asyncstreams-twitter`)
+  .settings(
+    publish := {},
+    bintrayRelease := {},
+    bintrayUnpublish := {}
+  )

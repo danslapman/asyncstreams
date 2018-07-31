@@ -1,17 +1,23 @@
-package asyncstreams.stdFuture
+package asyncstreams
+
+import java.util.concurrent.Executors
 
 import asyncstreams._
-import asyncstreams.statet._
+import asyncstreams.instances._
+import asyncstreams.ops.StateTOps
 import cats.instances.future._
 import cats.mtl.instances.state._
 import cats.mtl.syntax.empty._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers {
-  private val ftInstance = asStateTOps[Future]
-  import ftInstance._
+  override implicit def executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+
+  private val ops = StateTOps[Future]
+  import ops._
 
   test("foreach") {
     val ms = stateState[Future, Int]
