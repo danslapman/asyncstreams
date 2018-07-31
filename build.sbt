@@ -3,7 +3,7 @@ val versions = Map(
   "twitter" -> "18.7.0"
 )
 
-lazy val root = (project in file("core"))
+lazy val asyncstreams = (project in file("core"))
   .aggregate(`asyncstreams-twitter`)
   .settings(Settings.common)
   .settings(
@@ -18,7 +18,7 @@ lazy val root = (project in file("core"))
     )
   )
 
-lazy val asyncstreamsRef = LocalProject("root")
+lazy val asyncstreamsRef = LocalProject("asyncstreams")
 
 lazy val `asyncstreams-twitter` = (project in file("twitter"))
   .dependsOn(asyncstreamsRef)
@@ -31,4 +31,13 @@ lazy val `asyncstreams-twitter` = (project in file("twitter"))
       "io.catbird" %% "catbird-util" % versions("twitter") % Test,
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
     )
+  )
+
+lazy val root = (project in file("."))
+  .dependsOn(asyncstreams, `asyncstreams-twitter`)
+  .aggregate(asyncstreams, `asyncstreams-twitter`)
+  .settings(
+    publish := {},
+    bintrayRelease := {},
+    bintrayUnpublish := {}
   )
