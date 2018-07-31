@@ -1,8 +1,7 @@
-package asyncstreams.stdFuture
+package asyncstreams
 
 import java.util.concurrent.Executors
 
-import asyncstreams._
 import asyncstreams.instances._
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}

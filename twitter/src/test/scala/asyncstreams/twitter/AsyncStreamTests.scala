@@ -1,8 +1,8 @@
-package asyncstreams.twitterFuture
+package asyncstreams.twitter
 
-/*
 import asyncstreams._
-import asyncstreams.{ASImpl, AsyncStream}
+import asyncstreams.instances._
+import asyncstreams.twitter._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.semigroupk._
@@ -12,7 +12,7 @@ import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 
-class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with FutureInstances {
+class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
   private def wait[T](f: Future[T]): T = Await.result(f)
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
 
@@ -23,7 +23,7 @@ class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with Futu
 
   test("foldLeft") {
     val s2 = List(2, 3).toAS[Future]
-    val f = implicitly[ASImpl[Future]].collectLeft(s2)(List[Int]())((list, el) => el :: list)
+    val f = s2.foldLeft(List[Int]())((list, el) => el :: list)
     wait(f) shouldBe List(3, 2)
   }
 
@@ -83,4 +83,3 @@ class AsyncStreamTestsWithTwitterFuture extends FunSuite with Matchers with Futu
     wait(flatStream.to[Vector]) shouldBe Vector.range(0, 1000000)
   }
 }
-*/

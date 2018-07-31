@@ -1,4 +1,4 @@
-package asyncstreams.stdFuture
+package asyncstreams
 
 import java.util.concurrent.Executors
 

@@ -1,4 +1,4 @@
-package asyncstreams.stdFuture
+package asyncstreams
 
 import java.util.concurrent.Executors
 
@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class AsyncStreamTestsWithStandardFuture extends AsyncFunSuite with Matchers {
+class AsyncStreamTests extends AsyncFunSuite with Matchers {
   override implicit def executionContext: ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
