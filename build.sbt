@@ -24,7 +24,7 @@ lazy val `asyncstreams-twitter` = (project in file("twitter"))
   .dependsOn(asyncstreamsRef)
   .settings(Settings.common)
   .settings(
-    name := "asyncstreams",
+    name := "asyncstreams-twitter",
     parallelExecution in ThisBuild := false,
     libraryDependencies ++= Seq(
       "com.twitter" %% "util-core" % versions("twitter"),
