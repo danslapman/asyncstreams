@@ -25,4 +25,11 @@ package object asyncstreams {
     override def orElse[A](fa: Future[A], default: => Future[A]): Future[A] =
       me.recoverWith(fa) { case _: NoSuchElementException  => default }
   }
+
+  implicit val optionEmptyKOrElse: EmptyKOrElse[Option] = new EmptyKOrElse[Option] {
+    override def empty[A]: Option[A] = None
+
+    override def orElse[A](fa: Option[A], default: => Option[A]): Option[A] =
+      fa.orElse(default)
+  }
 }
