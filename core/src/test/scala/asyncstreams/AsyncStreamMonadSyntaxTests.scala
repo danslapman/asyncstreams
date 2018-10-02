@@ -7,7 +7,7 @@ import asyncstreams.instances._
 import asyncstreams.ops.StateTOps
 import cats.instances.future._
 import cats.mtl.instances.state._
-import cats.mtl.syntax.empty._
+import cats.syntax.functorFilter._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
 import scala.concurrent.{ExecutionContext, Future}

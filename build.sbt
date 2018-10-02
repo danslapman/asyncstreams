@@ -1,5 +1,5 @@
 val versions = Map(
-  "cats" -> "1.2.0",
+  "cats" -> "1.4.0",
   "twitter" -> "18.7.0"
 )
 
@@ -12,7 +12,7 @@ lazy val asyncstreams = (project in file("core"))
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % versions("cats"),
       "org.typelevel" %% "alleycats-core" % versions("cats"),
-      "org.typelevel" %% "cats-mtl-core" % "0.3.0",
+      "org.typelevel" %% "cats-mtl-core" % "0.4.0",
       "com.github.mpilquist" %% "simulacrum" % "0.13.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
     )

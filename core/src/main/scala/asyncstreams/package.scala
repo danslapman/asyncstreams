@@ -1,6 +1,5 @@
-import cats.{Monad, MonadError}
-import cats.mtl.FunctorEmpty
-import cats.mtl.syntax.empty._
+import cats.{Monad, MonadError, FunctorFilter}
+import cats.syntax.functorFilter._
 import cats.syntax.applicative._
 
 import scala.concurrent.Future
@@ -15,7 +14,7 @@ package object asyncstreams {
     def toAS[F[_]: Monad: EmptyKOrElse]: AsyncStream[F, T] = AsyncStream.fromIterable(it)
   }
 
-  implicit class FunctorEmptyWithFilter[F[_] : FunctorEmpty, A](fa: F[A]) {
+  implicit class FunctorEmptyWithFilter[F[_] : FunctorFilter, A](fa: F[A]) {
     def withFilter(f: A => Boolean): F[A] = fa.filter(f)
   }
 

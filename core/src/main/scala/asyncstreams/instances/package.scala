@@ -3,7 +3,7 @@ package asyncstreams
 import alleycats.EmptyK
 import cats._
 import cats.data.StateT
-import cats.mtl.FunctorEmpty
+import cats.FunctorFilter
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -27,8 +27,8 @@ package object instances {
       }
     }
 
-  implicit def stateTFunctorEmpty[F[_], S](implicit fst: Functor[StateT[F, S, ?]], mf: Monad[F], emptyk: EmptyK[F]): FunctorEmpty[StateT[F, S, ?]] =
-    new FunctorEmpty[StateT[F, S, ?]] {
+  implicit def stateTFunctorEmpty[F[_], S](implicit fst: Functor[StateT[F, S, ?]], mf: Monad[F], emptyk: EmptyK[F]): FunctorFilter[StateT[F, S, ?]] =
+    new FunctorFilter[StateT[F, S, ?]] {
       override def mapFilter[A, B](fa: StateT[F, S, A])(f: A => Option[B]): StateT[F, S, B] =
         collect(fa.map(f)) { case Some(e) => e }
 
