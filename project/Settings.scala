@@ -5,7 +5,7 @@ import sbt.Keys._
 object Settings {
   val common = Seq(
     organization := "danslapman",
-    version := "2.0.0",
+    version := "2.1.0",
     scalaVersion := "2.12.6",
     crossScalaVersions := Seq("2.11.12", "2.12.6"),
     scalacOptions += "-Ypartial-unification",

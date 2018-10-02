@@ -28,5 +28,5 @@ asyncstreams is available via bintray:
 ```
     resolvers += Resolver.bintrayRepo("danslapman", "maven")
 
-    libraryDependencies += "danslapman" %% "asyncstreams" % "2.0.0"
+    libraryDependencies += "danslapman" %% "asyncstreams" % "2.1.0"
 ```
