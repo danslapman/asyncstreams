@@ -75,7 +75,11 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
   }
 
   def flatMap[B](f: A => AsyncStream[F, B]): AsyncStream[F, B] = AsyncStream {
-    data.flatMap(s => (f(s._1) ++ s._2.value.flatMap(f)).data)
+    for {
+      (head, tail) <- data
+      headStream = f(head)
+      (newHead, newTail) <- headStream.data
+    } yield newHead -> newTail.flatMap(ta => tail.map(tb => ta ++ tb.flatMap(f)))
   }
 
   def filter(p: A => Boolean): AsyncStream[F, A] = AsyncStream {
