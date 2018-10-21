@@ -3,7 +3,6 @@ package asyncstreams
 import java.util.concurrent.Executors
 
 import asyncstreams._
-import asyncstreams.instances._
 import cats.instances.future._
 import cats.syntax.semigroupk._
 import org.scalatest.{AsyncFunSuite, Matchers}
@@ -32,7 +31,7 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers {
   test("concatenation") {
     val s1 = List(0, 1).toAS[Future]
     val s2 = List(2, 3).toAS[Future]
-    val f = s1 <+> s2
+    val f = s1 ++ s2
     f.to[List].map(_ shouldBe List(0, 1, 2, 3))
   }
 

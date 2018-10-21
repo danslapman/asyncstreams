@@ -1,7 +1,6 @@
 package asyncstreams.twitter
 
 import asyncstreams._
-import asyncstreams.instances._
 import asyncstreams.twitter._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -30,7 +29,7 @@ class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
   test("concatenation") {
     val s1 = List(0, 1).toAS[Future]
     val s2 = List(2, 3).toAS[Future]
-    val f = s1 <+> s2
+    val f = s1 ++ s2
     wait(f.to[List]) shouldBe List(0, 1, 2, 3)
   }
 
