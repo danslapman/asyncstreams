@@ -2,7 +2,6 @@ package asyncstreams
 
 import java.util.concurrent.Executors
 
-import asyncstreams.instances._
 import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.applicative._
@@ -41,6 +40,7 @@ class AsyncStreamOperations extends AsyncFunSuite with Matchers {
     res.map(_ should have length 100000)
   }
 
+  /*
   test("flatMap") {
     val res = stream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: AsyncStream.asyncNil[Future, Int]).to[Vector]
 
@@ -52,6 +52,7 @@ class AsyncStreamOperations extends AsyncFunSuite with Matchers {
 
     res.map(_ should have length 200000)
   }
+  */
 
   test("filter") {
     val res = stream.filter(_ % 2 == 0).to[Vector]

@@ -8,7 +8,7 @@ import scala.language.higherKinds
 package object asyncstreams {
   type Step[A, B] = (A, Eval[B])
 
-  implicit class AsyncStreamOps[F[_]: Monad: EmptyKOrElse, A](stream: => AsyncStream[F, A]) {
+  implicit class AsyncStreamOps[F[_]: Monad: EmptyKOrElse, A](stream: AsyncStream[F, A]) {
     def ~::(el: A) = AsyncStream((el -> Eval.now(stream)).pure[F])
   }
 

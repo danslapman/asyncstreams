@@ -2,9 +2,6 @@ package asyncstreams.twitter
 
 import asyncstreams._
 import asyncstreams.twitter._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.syntax.semigroupk._
 import com.twitter.util.{Await, Future}
 import io.catbird.util.FutureInstances
 import org.scalatest.{FunSuite, Matchers}

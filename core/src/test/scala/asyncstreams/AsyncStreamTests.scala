@@ -2,9 +2,7 @@ package asyncstreams
 
 import java.util.concurrent.Executors
 
-import asyncstreams._
 import cats.instances.future._
-import cats.syntax.semigroupk._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
