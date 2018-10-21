@@ -126,7 +126,6 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
 
 object AsyncStream {
   private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] = new AsyncStream(data)
-  def asyncNil[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] = empty
 
   private[asyncstreams] def generate[F[_]: Monad: EmptyKOrElse, S, A](start: S)(gen: S => F[(S, A)]): AsyncStream[F, A] = AsyncStream {
     gen(start).map((stateEl: (S, A)) => stateEl._2 -> Eval.later(generate(stateEl._1)(gen)))

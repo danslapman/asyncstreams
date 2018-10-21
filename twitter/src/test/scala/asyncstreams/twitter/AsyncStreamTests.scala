@@ -13,7 +13,7 @@ class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
+    val s = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
     wait(s.to[List]) shouldBe List(1, 2, 3)
   }
 

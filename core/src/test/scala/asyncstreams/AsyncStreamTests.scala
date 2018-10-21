@@ -14,9 +14,10 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers {
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
+  private def longStream = makeInfStream.take(100000)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
+    val s = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
     s.to[List].map(_ shouldBe List(1, 2, 3))
   }
 
@@ -31,6 +32,12 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers {
     val s2 = List(2, 3).toAS[Future]
     val f = s1 ++ s2
     f.to[List].map(_ shouldBe List(0, 1, 2, 3))
+  }
+
+  test("concatenating large streams should not crash") {
+    val res = (longStream ++ longStream).foldLeft(0)((i, _) => i + 1)
+
+    res.map(_ shouldBe 200000)
   }
 
   test("working as monad") {

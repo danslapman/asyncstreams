@@ -41,16 +41,18 @@ class AsyncStreamOperations extends AsyncFunSuite with Matchers {
   }
 
   test("flatMap") {
-    val res = stream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: AsyncStream.asyncNil[Future, Int]).to[Vector]
+    val res = stream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: ANil[Future, Int]).to[Vector]
 
     res.map(_ shouldBe (0 to 61))
   }
 
+  /*
   test("flatMap long stream") {
     val res = longStream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: AsyncStream.asyncNil[Future, Int]).to[Vector]
 
     res.map(_ should have length 200000)
   }
+  */
 
   test("filter") {
     val res = stream.filter(_ % 2 == 0).to[Vector]
@@ -123,8 +125,8 @@ class AsyncStreamOperations extends AsyncFunSuite with Matchers {
   }
 
   test("zip") {
-    val s1 = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
-    val s2 = 4 ~:: 5 ~:: AsyncStream.asyncNil[Future, Int]
+    val s1 = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
+    val s2 = 4 ~:: 5 ~:: ANil[Future, Int]
 
     val res = s1 zip s2
 

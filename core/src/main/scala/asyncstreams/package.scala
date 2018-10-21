@@ -33,4 +33,9 @@ package object asyncstreams {
     override def orElse[A](fa: Option[A], default: => Option[A]): Option[A] =
       fa.orElse(default)
   }
+
+  object ANil {
+    def apply[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] =
+      AsyncStream.empty[F, A]
+  }
 }
