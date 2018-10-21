@@ -64,7 +64,7 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
   }
 
   def isEmpty: F[Boolean] = data.map(_ => false).orElse(true.pure[F])
-  def nonEmpty: F[Boolean] = isEmpty.map(!_)
+  def nonEmpty: F[Boolean] = data.map(_ => true).orElse(false.pure[F])
 
   def map[B](f: A => B): AsyncStream[F, B] = AsyncStream {
     data.map(s => f(s._1) -> s._2.map(_.map(f)))
