@@ -1,23 +1,21 @@
 package asyncstreams.twitter
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 import asyncstreams._
-import asyncstreams.instances._
 import asyncstreams.twitter._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.syntax.semigroupk._
 import com.twitter.util.{Await, Future}
 import io.catbird.util.FutureInstances
 import org.scalatest.{FunSuite, Matchers}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConverters._
 
-class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
+class AsyncStreamTwitterTests extends FunSuite with Matchers with FutureInstances with TestHelpers {
   private def wait[T](f: Future[T]): T = Await.result(f)
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
+    val s = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
     wait(s.to[List]) shouldBe List(1, 2, 3)
   }
 
@@ -30,7 +28,7 @@ class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
   test("concatenation") {
     val s1 = List(0, 1).toAS[Future]
     val s2 = List(2, 3).toAS[Future]
-    val f = s1 <+> s2
+    val f = s1 ++ s2
     wait(f.to[List]) shouldBe List(0, 1, 2, 3)
   }
 
@@ -63,18 +61,18 @@ class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
 
   test("foreach") {
     val stream = makeInfStream.take(10)
-    val buffer = ArrayBuffer[Int]()
-    val task = stream.foreach(i => buffer += i)
+    val buffer = new CopyOnWriteArrayList[Int]()
+    val task = stream.foreach(i => buffer.add(i))
     Await.ready(task)
-    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+    buffer.asScala shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("foreachF") {
     val stream = makeInfStream.take(10)
-    val buffer = ArrayBuffer[Int]()
-    val task = stream.foreachF(i => Future(buffer += i))
+    val buffer = new CopyOnWriteArrayList[Int]()
+    val task = stream.foreachF(i => Future(buffer.add(i)))
     Await.ready(task)
-    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+    buffer.asScala shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("flatten") {

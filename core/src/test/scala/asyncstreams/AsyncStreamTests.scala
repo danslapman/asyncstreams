@@ -1,25 +1,24 @@
 package asyncstreams
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{CopyOnWriteArrayList, Executors}
 
-import asyncstreams._
-import asyncstreams.instances._
 import cats.instances.future._
-import cats.syntax.semigroupk._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class AsyncStreamTests extends AsyncFunSuite with Matchers {
+import scala.collection.JavaConverters._
+
+class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
+  private def longStream = makeInfStream.take(100000)
 
   test("composition operator") {
-    val s = 1 ~:: 2 ~:: 3 ~:: AsyncStream.asyncNil[Future, Int]
+    val s = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
     s.to[List].map(_ shouldBe List(1, 2, 3))
   }
 
@@ -32,8 +31,14 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers {
   test("concatenation") {
     val s1 = List(0, 1).toAS[Future]
     val s2 = List(2, 3).toAS[Future]
-    val f = s1 <+> s2
+    val f = s1 ++ s2
     f.to[List].map(_ shouldBe List(0, 1, 2, 3))
+  }
+
+  test("concatenating large streams should not crash") {
+    val res = (longStream ++ longStream).foldLeft(0)((i, _) => i + 1)
+
+    res.map(_ shouldBe 200000)
   }
 
   test("working as monad") {
@@ -65,18 +70,18 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers {
 
   test("foreach") {
     val stream = makeInfStream.take(10)
-    val buffer = ArrayBuffer[Int]()
-    val task = stream.foreach(i => buffer += i)
+    val buffer = new CopyOnWriteArrayList[Int]()
+    val task = stream.foreach(i => buffer.add(i))
     Await.ready(task, 10.seconds)
-    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+    buffer.asScala shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("foreachF") {
     val stream = makeInfStream.take(10)
-    val buffer = ArrayBuffer[Int]()
-    val task = stream.foreachF(i => Future(buffer += i))
+    val buffer = new CopyOnWriteArrayList[Int]()
+    val task = stream.foreachF(i => Future(buffer.add(i)))
     Await.ready(task, 10.seconds)
-    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+    buffer.asScala shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("flatten") {

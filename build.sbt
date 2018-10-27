@@ -15,13 +15,14 @@ lazy val asyncstreams = (project in file("core"))
       "org.typelevel" %% "cats-mtl-core" % "0.4.0",
       "com.github.mpilquist" %% "simulacrum" % "0.13.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
-    )
+    ),
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")
   )
 
 lazy val asyncstreamsRef = LocalProject("asyncstreams")
 
 lazy val `asyncstreams-twitter` = (project in file("twitter"))
-  .dependsOn(asyncstreamsRef)
+  .dependsOn(asyncstreamsRef % "test->test;compile->compile")
   .settings(Settings.common)
   .settings(
     name := "asyncstreams-twitter",

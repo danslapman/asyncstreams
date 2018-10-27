@@ -1,4 +1,4 @@
-import cats.{Monad, MonadError, FunctorFilter}
+import cats.{Eval, FunctorFilter, Monad, MonadError}
 import cats.syntax.functorFilter._
 import cats.syntax.applicative._
 
@@ -6,8 +6,10 @@ import scala.concurrent.Future
 import scala.language.higherKinds
 
 package object asyncstreams {
-  implicit class AsyncStreamOps[F[_]: Monad: EmptyKOrElse, A](stream: => AsyncStream[F, A]) {
-    def ~::(el: A) = AsyncStream(Step(el, stream).pure[F])
+  type Step[A, B] = (A, Eval[B])
+
+  implicit class AsyncStreamOps[F[_]: Monad: EmptyKOrElse, A](stream: AsyncStream[F, A]) {
+    def ~::(el: A) = AsyncStream((el -> Eval.now(stream)).pure[F])
   }
 
   implicit class IterableToAS[T](it: Iterable[T]) {
@@ -30,5 +32,10 @@ package object asyncstreams {
 
     override def orElse[A](fa: Option[A], default: => Option[A]): Option[A] =
       fa.orElse(default)
+  }
+
+  object ANil {
+    def apply[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] =
+      AsyncStream.empty[F, A]
   }
 }

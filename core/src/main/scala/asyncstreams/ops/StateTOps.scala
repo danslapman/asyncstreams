@@ -33,7 +33,7 @@ class StateTOps[F[_]: Monad: EmptyKOrElse] {
   }
 
   def get[A, S](stream: AsyncStream[F, A]): StateT[F, S, (AsyncStream[F, A], A)] = StateT { s =>
-    stream.data.map(step => (s, (step.rest, step.value)))
+    stream.data.map(step => (s, (step._2.value, step._1)))
   }
 
   def genS[S, A](start: S)(gen: StateT[F, S, A]): AsyncStream[F, A] =

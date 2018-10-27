@@ -6,10 +6,10 @@ object Settings {
   val common = Seq(
     organization := "danslapman",
     version := "2.1.0",
-    scalaVersion := "2.12.6",
-    crossScalaVersions := Seq("2.11.12", "2.12.6"),
+    scalaVersion := "2.12.7",
+    crossScalaVersions := Seq("2.11.12", "2.12.7"),
     scalacOptions += "-Ypartial-unification",
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7"),
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
     licenses += ("WTFPL", url("http://www.wtfpl.net")),
     bintrayOrganization := Some("danslapman"),
