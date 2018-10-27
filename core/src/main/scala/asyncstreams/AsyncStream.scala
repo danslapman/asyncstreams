@@ -24,9 +24,8 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
     impl(data, init.pure[F])
   }
 
-  def ++(other: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
-    this.data.map(step => step._1 -> step._2.map(_ ++ other)).orElse(other.data)
-  }
+  def ++(other: AsyncStream[F, A]): AsyncStream[F, A] =
+    AsyncStream.concat(this, other)
 
   def to[Col[+_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): F[Col[A]] =
     foldLeft(cbf())((col, el) => col += el).map(_.result())
@@ -54,11 +53,14 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
     foldLeft(())((_: Unit, a: A) => {f(a); ()})
 
   def foreachF[U](f: A => F[U]): F[Unit] =
-    foldLeft(().pure[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).map(_ => ())).flatMap(identity)
+    foldLeft(().pure[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).void).flatMap(identity)
 
   def flatten[B](implicit asIterable: A => GenIterable[B]): AsyncStream[F, B] = {
     def streamChunk(step: Step[A, AsyncStream[F, A]]): AsyncStream[F, B] =
-       AsyncStream.fromIterable(asIterable(step._1).seq) ++ step._2.value.flatten
+      AsyncStream.concat(
+        AsyncStream.fromIterable(asIterable(step._1).seq),
+        step._2.value.flatten
+      )
 
     AsyncStream(data.flatMap(step => streamChunk(step).data))
   }
@@ -79,7 +81,7 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
       (head, tail) <- data
       headStream = f(head)
       (newHead, newTail) <- headStream.data
-    } yield newHead -> newTail.flatMap(ta => tail.map(tb => ta ++ tb.flatMap(f)))
+    } yield newHead -> newTail.flatMap(ta => tail.map(tb => AsyncStream.concat(ta, tb.flatMap(f))))
   }
 
   def filter(p: A => Boolean): AsyncStream[F, A] = AsyncStream {
@@ -145,5 +147,9 @@ object AsyncStream {
 
   def unfoldMM[F[_]: Monad: EmptyKOrElse, T](start: F[T])(makeNext: T => F[T]): AsyncStream[F, T] = AsyncStream {
     start.flatMap(initial => generate(initial)(s => makeNext(s).map(n => (n, s))).data)
+  }
+
+  def concat[F[_]: Monad: EmptyKOrElse, A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
+    x.data.map(step => step._1 -> step._2.map(concat(_, y))).orElse(y.data)
   }
 }

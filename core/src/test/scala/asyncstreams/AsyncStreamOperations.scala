@@ -46,13 +46,11 @@ class AsyncStreamOperations extends AsyncFunSuite with Matchers {
     res.map(_ shouldBe (0 to 61))
   }
 
-  /*
   test("flatMap long stream") {
-    val res = longStream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: AsyncStream.asyncNil[Future, Int]).to[Vector]
+    val res = longStream.map(_ * 2).flatMap(v => v ~:: (v + 1) ~:: ANil[Future, Int]).to[Vector]
 
     res.map(_ should have length 200000)
   }
-  */
 
   test("filter") {
     val res = stream.filter(_ % 2 == 0).to[Vector]
