@@ -1,4 +1,4 @@
-import cats.{Monad, MonadError, FunctorFilter, Eval}
+import cats.{Eval, FunctorFilter, Monad, MonadError}
 import cats.syntax.functorFilter._
 import cats.syntax.applicative._
 

@@ -8,7 +8,7 @@ import org.scalatest.{AsyncFunSuite, Matchers}
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
-class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers {
+class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 

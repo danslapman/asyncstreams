@@ -22,7 +22,7 @@ lazy val asyncstreams = (project in file("core"))
 lazy val asyncstreamsRef = LocalProject("asyncstreams")
 
 lazy val `asyncstreams-twitter` = (project in file("twitter"))
-  .dependsOn(asyncstreamsRef)
+  .dependsOn(asyncstreamsRef % "test->test;compile->compile")
   .settings(Settings.common)
   .settings(
     name := "asyncstreams-twitter",

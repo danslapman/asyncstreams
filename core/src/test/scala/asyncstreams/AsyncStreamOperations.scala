@@ -9,7 +9,7 @@ import org.scalatest.{AsyncFunSuite, Matchers}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AsyncStreamOperations extends AsyncFunSuite with Matchers {
+class AsyncStreamOperations extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 

@@ -12,7 +12,7 @@ import org.scalatest.{AsyncFunSuite, Matchers}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers {
+class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 

@@ -8,7 +8,7 @@ import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 
-class AsyncStreamTests extends FunSuite with Matchers with FutureInstances {
+class AsyncStreamTests extends FunSuite with Matchers with FutureInstances with TestHelpers {
   private def wait[T](f: Future[T]): T = Await.result(f)
   private def makeInfStream: AsyncStream[Future, Int] = AsyncStream.unfold(0)(_ + 1)
 

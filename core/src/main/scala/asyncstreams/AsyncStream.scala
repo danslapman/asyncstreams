@@ -9,9 +9,7 @@ import cats.syntax.option._
 import cats.syntax.semigroup._
 import EmptyKOrElse.ops._
 
-import scala.annotation.unchecked.{uncheckedVariance => uV}
 import scala.collection.GenIterable
-import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
@@ -26,9 +24,6 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
 
   def ++(other: AsyncStream[F, A]): AsyncStream[F, A] =
     AsyncStream.concat(this, other)
-
-  def to[Col[+_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): F[Col[A]] =
-    foldLeft(cbf())((col, el) => col += el).map(_.result())
 
   def takeWhile(p: A => Boolean): AsyncStream[F, A] = AsyncStream {
     data.flatMap {
