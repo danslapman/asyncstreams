@@ -78,7 +78,7 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers {
   test("foreachF") {
     val stream = makeInfStream.take(10)
     val buffer = ArrayBuffer[Int]()
-    val task = stream.foreachF(i => Future(buffer += i))
+    val task = stream.foreachF(i => Future.successful(buffer += i))
     Await.ready(task, 10.seconds)
     buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }

@@ -1,7 +1,7 @@
 package asyncstreams
 
 import cats.kernel.Monoid
-import cats.{Eval, Monad}
+import cats.{Applicative, Eval, Monad}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -50,10 +50,14 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
     }
 
   def foreach[U](f: A => U): F[Unit] =
-    foldLeft(())((_: Unit, a: A) => {f(a); ()})
+    data.flatMap { case (value, rest) =>
+      f(value).pure[F] >> rest.value.foreach(f)
+    }.orElse(Applicative[F].unit)
 
   def foreachF[U](f: A => F[U]): F[Unit] =
-    foldLeft(().pure[F])((fu: F[Unit], a: A) => fu.flatMap(_ => f(a)).void).flatMap(identity)
+    data.flatMap { case (value, rest) =>
+      f(value) >> rest.value.foreach(f)
+    }.orElse(Applicative[F].unit)
 
   def flatten[B](implicit asIterable: A => GenIterable[B]): AsyncStream[F, B] = {
     def streamChunk(step: Step[A, AsyncStream[F, A]]): AsyncStream[F, B] =
@@ -127,7 +131,8 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
 }
 
 object AsyncStream {
-  private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] = new AsyncStream(data)
+  private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] =
+    new AsyncStream(data)
 
   private[asyncstreams] def generate[F[_]: Monad: EmptyKOrElse, S, A](start: S)(gen: S => F[(S, A)]): AsyncStream[F, A] = AsyncStream {
     gen(start).map((stateEl: (S, A)) => stateEl._2 -> Eval.later(generate(stateEl._1)(gen)))
