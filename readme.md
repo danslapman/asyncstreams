@@ -1,7 +1,7 @@
 asyncstreams [ ![Download](https://api.bintray.com/packages/danslapman/maven/asyncstreams/images/download.svg) ](https://bintray.com/danslapman/maven/asyncstreams/_latestVersion)
 =========
 
-asyncstreams is a monadic asynchronous stream library. It allows you to write stateful asynchronous algorithms
+asyncstreams is a asynchronous pull-based stream library. It allows you to write stateful asynchronous algorithms
 that emits elements into a stream:
 
 ```scala
@@ -28,5 +28,5 @@ asyncstreams is available via bintray:
 ```
     resolvers += Resolver.bintrayRepo("danslapman", "maven")
 
-    libraryDependencies += "danslapman" %% "asyncstreams" % "2.1.0"
+    libraryDependencies += "danslapman" %% "asyncstreams" % "3.0.0"
 ```

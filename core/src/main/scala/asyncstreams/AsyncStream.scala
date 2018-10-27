@@ -1,7 +1,7 @@
 package asyncstreams
 
 import cats.kernel.Monoid
-import cats.{Alternative, Applicative, Eval, Monad, StackSafeMonad}
+import cats.{Applicative, Eval, Monad}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
