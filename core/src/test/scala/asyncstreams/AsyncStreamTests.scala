@@ -1,13 +1,14 @@
 package asyncstreams
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{CopyOnWriteArrayList, Executors}
 
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
+
+import scala.collection.JavaConverters._
 
 class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
@@ -69,18 +70,18 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
 
   test("foreach") {
     val stream = makeInfStream.take(10)
-    val buffer = ArrayBuffer[Int]()
-    val task = stream.foreach(i => buffer += i)
+    val buffer = new CopyOnWriteArrayList[Int]()
+    val task = stream.foreach(i => buffer.add(i))
     Await.ready(task, 10.seconds)
-    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+    buffer.asScala shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("foreachF") {
     val stream = makeInfStream.take(10)
-    val buffer = ArrayBuffer[Int]()
-    val task = stream.foreachF(i => Future(buffer += i))
+    val buffer = new CopyOnWriteArrayList[Int]()
+    val task = stream.foreachF(i => Future(buffer.add(i)))
     Await.ready(task, 10.seconds)
-    buffer.to[List] shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
+    buffer.asScala shouldBe 0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: Nil
   }
 
   test("flatten") {
