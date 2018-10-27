@@ -25,4 +25,20 @@ package object instances {
 
       override val functor: Functor[StateT[F, S, ?]] = fst
     }
+
+  implicit def asyncStreamInstance[F[_]: Monad: EmptyKOrElse]: Monad[AsyncStream[F, ?]] with Alternative[AsyncStream[F, ?]] =
+    new Monad[AsyncStream[F, ?]] with Alternative[AsyncStream[F, ?]] with StackSafeMonad[AsyncStream[F, ?]] {
+      override def pure[A](x: A): AsyncStream[F, A] = x ~:: ANil[F, A]
+
+      override def map[A, B](fa: AsyncStream[F, A])(f: A => B): AsyncStream[F, B] =
+        fa.map(f)
+
+      override def flatMap[A, B](fa: AsyncStream[F, A])(f: A => AsyncStream[F, B]): AsyncStream[F, B] =
+        fa.flatMap(f)
+
+      override def empty[A]: AsyncStream[F, A] = ANil[F, A]
+
+      override def combineK[A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] =
+        AsyncStream.concat(x, y)
+    }
 }
