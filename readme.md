@@ -28,20 +28,16 @@ val s6 = List.range(0, 50).toAS[Future, Int]
 #### Consuming AsyncStream
 
 ```scala
-
-// Taking first 50 elements from s4 defined above
-val finiteStream = s4.take(50)
-
 // If process function is synchronous, use foreach
 // foreach receives A => Something
-finiteStream.foreach { i =>
+stream.foreach { i =>
     process(i)
 }
 
 // If You want to process elements asynchronously,
 // You can use foreachF
 // foreachF receives A => F[Something]
-finiteStream.foreachF { i =>
+stream.foreachF { i =>
     process(i)
 }
 
