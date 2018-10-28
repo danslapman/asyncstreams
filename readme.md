@@ -51,12 +51,12 @@ You can write stateful asynchronous algorithms that emits elements into a stream
 
 ```scala
 val stream = genS(0) {
-      for {
-        s <- getS[Int]
-        if s < 3
-        _ <- putS(s + 1)
-      } yield s
-    }
+  for {
+     s <- getS[Int]
+     if s < 3
+     _ <- putS(s + 1)
+   } yield s
+ }
 
 stream.foreach(println)
 // Output:
