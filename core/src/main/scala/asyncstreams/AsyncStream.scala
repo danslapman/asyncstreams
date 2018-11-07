@@ -51,7 +51,7 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
 
   def foreachF[U](f: A => F[U]): F[Unit] =
     data.flatMap { case (value, rest) =>
-      f(value) >> rest.value.foreach(f)
+      f(value) >> rest.value.foreachF(f)
     }.orElse(Applicative[F].unit)
 
   def flatten[B](implicit asIterable: A => GenIterable[B]): AsyncStream[F, B] = {
