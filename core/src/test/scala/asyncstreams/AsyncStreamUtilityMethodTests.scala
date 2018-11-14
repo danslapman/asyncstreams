@@ -1,5 +1,6 @@
 package asyncstreams
 
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{CopyOnWriteArrayList, Executors}
 
 import cats.instances.future._
@@ -72,5 +73,23 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
     }.map { _ =>
       output.asScala shouldBe List.range(1, 21).flatMap(i => List(s"Emit $i", s"Receive ${i - 1}")) ::: List("Emit 21")
     }
+  }
+
+  test("continually") {
+    val i = new AtomicInteger(0)
+
+    val as = AsyncStream.continually(i.getAndIncrement()).take(20)
+
+    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+  }
+
+  test("continuallyF") {
+    val i = new AtomicInteger(0)
+
+    def next = Future.successful(i.getAndIncrement())
+
+    val as = AsyncStream.continuallyF(next).take(20)
+
+    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
   }
 }
