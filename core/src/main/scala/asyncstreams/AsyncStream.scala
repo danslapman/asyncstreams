@@ -1,14 +1,15 @@
 package asyncstreams
 
 import cats.kernel.Monoid
-import cats.{Applicative, Eval, Monad}
+import cats.{Applicative, Eval, Monad, ~>}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.semigroup._
 import EmptyKOrElse.ops._
-import cats.data.StateT
+import alleycats.Pure
+import cats.data.{State, StateT}
 
 import scala.collection.GenIterable
 import scala.language.higherKinds
@@ -130,11 +131,17 @@ object AsyncStream {
   private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] =
     new AsyncStream(data)
 
+
+  private[asyncstreams] def evalF[F[_]: Pure]: Eval ~> F = λ[Eval ~> F](e => Pure[F].pure(e.value))
+
   def empty[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] = AsyncStream(EmptyKOrElse[F].empty)
 
   def fromIterable[F[_]: Monad: EmptyKOrElse, T](it: Iterable[T]): AsyncStream[F, T] = AsyncStream {
     if (it.nonEmpty) (it.head -> Eval.later(fromIterable(it.tail))).pure[F] else EmptyKOrElse[F].empty
   }
+
+  def unfoldS[F[_]: Monad: EmptyKOrElse, S, T](initial: S)(gen: State[S, T]): AsyncStream[F, T] =
+    unfoldST(initial)(gen.mapK(evalF))
 
   def unfoldST[F[_]: Monad: EmptyKOrElse, S, T](initial: S)(gen: StateT[F, S, T]): AsyncStream[F, T] = AsyncStream {
     gen.run(initial).map {
@@ -143,7 +150,7 @@ object AsyncStream {
   }
 
   def unfold[F[_]: Monad: EmptyKOrElse, T](start: T)(makeNext: T => T): AsyncStream[F, T] =
-    unfoldST(start)(StateT(s => (makeNext(s), s).pure[F]))
+    unfoldS(start)(StateT(s => Eval.later((makeNext(s), s))))
 
   def unfoldM[F[_]: Monad: EmptyKOrElse, T](start: T)(makeNext: T => F[T]): AsyncStream[F, T] =
     unfoldST(start)(StateT(s => makeNext(s).map(n => (n, s))))
