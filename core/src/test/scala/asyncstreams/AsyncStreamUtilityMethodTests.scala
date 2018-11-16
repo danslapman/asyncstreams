@@ -3,6 +3,7 @@ package asyncstreams
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{CopyOnWriteArrayList, Executors}
 
+import cats.Eval
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
@@ -89,6 +90,22 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
     def next = Future.successful(i.getAndIncrement())
 
     val as = AsyncStream.continuallyF(next).take(20)
+
+    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+  }
+
+  test("continuallyEval later") {
+    val i = new AtomicInteger(0)
+
+    val as = AsyncStream.continuallyEval(Eval.later(i.getAndIncrement())).take(20)
+
+    as.to[Vector].map(_ shouldBe Vector.fill(20)(0))
+  }
+
+  test("continuallyEval always") {
+    val i = new AtomicInteger(0)
+
+    val as = AsyncStream.continuallyEval(Eval.always(i.getAndIncrement())).take(20)
 
     as.to[Vector].map(_ shouldBe Vector.range(0, 20))
   }

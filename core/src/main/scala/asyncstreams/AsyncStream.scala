@@ -149,11 +149,16 @@ object AsyncStream {
     start.flatMap(initial => generate(initial)(s => makeNext(s).map(n => (n, s))).data)
   }
 
-  def continually[F[_]: Monad: EmptyKOrElse, T](elem: => T): AsyncStream[F, T] =
-    generate(elem)(s => (elem, s).pure[F])
+  def continually[F[_]: Monad: EmptyKOrElse, T](elem: => T): AsyncStream[F, T] = AsyncStream {
+    (elem -> Eval.later(AsyncStream.continually(elem))).pure[F]
+  }
 
   def continuallyF[F[_]: Monad: EmptyKOrElse, T](elem: => F[T]): AsyncStream[F, T] = AsyncStream {
     elem.flatMap(first => generate(first)(s => elem.map((_, s))).data)
+  }
+
+  def continuallyEval[F[_]: Monad: EmptyKOrElse, T](elem: Eval[T]): AsyncStream[F, T] = AsyncStream {
+    (elem.value -> Eval.later(AsyncStream.continuallyEval(elem))).pure[F]
   }
 
   def concat[F[_]: Monad: EmptyKOrElse, A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
