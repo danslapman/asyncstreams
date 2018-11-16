@@ -131,7 +131,6 @@ object AsyncStream {
   private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] =
     new AsyncStream(data)
 
-
   private[asyncstreams] def evalF[F[_]: Pure]: Eval ~> F = λ[Eval ~> F](e => Pure[F].pure(e.value))
 
   def empty[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] = AsyncStream(EmptyKOrElse[F].empty)
