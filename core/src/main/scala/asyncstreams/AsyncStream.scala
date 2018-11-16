@@ -8,6 +8,7 @@ import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.semigroup._
 import EmptyKOrElse.ops._
+import cats.data.StateT
 
 import scala.collection.GenIterable
 import scala.language.higherKinds
@@ -129,24 +130,26 @@ object AsyncStream {
   private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] =
     new AsyncStream(data)
 
-  private[asyncstreams] def generate[F[_]: Monad: EmptyKOrElse, S, A](start: S)(gen: S => F[(S, A)]): AsyncStream[F, A] = AsyncStream {
-    gen(start).map((stateEl: (S, A)) => stateEl._2 -> Eval.later(generate(stateEl._1)(gen)))
-  }
-
   def empty[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] = AsyncStream(EmptyKOrElse[F].empty)
 
   def fromIterable[F[_]: Monad: EmptyKOrElse, T](it: Iterable[T]): AsyncStream[F, T] = AsyncStream {
     if (it.nonEmpty) (it.head -> Eval.later(fromIterable(it.tail))).pure[F] else EmptyKOrElse[F].empty
   }
 
+  def unfoldST[F[_]: Monad: EmptyKOrElse, S, T](initial: S)(gen: StateT[F, S, T]): AsyncStream[F, T] = AsyncStream {
+    gen.run(initial).map {
+      case (s, t) => t -> Eval.later(unfoldST(s)(gen))
+    }
+  }
+
   def unfold[F[_]: Monad: EmptyKOrElse, T](start: T)(makeNext: T => T): AsyncStream[F, T] =
-    generate(start)(s => (makeNext(s), s).pure[F])
+    unfoldST(start)(StateT(s => (makeNext(s), s).pure[F]))
 
   def unfoldM[F[_]: Monad: EmptyKOrElse, T](start: T)(makeNext: T => F[T]): AsyncStream[F, T] =
-    generate(start)(s => makeNext(s).map(n => (n, s)))
+    unfoldST(start)(StateT(s => makeNext(s).map(n => (n, s))))
 
   def unfoldMM[F[_]: Monad: EmptyKOrElse, T](start: F[T])(makeNext: T => F[T]): AsyncStream[F, T] = AsyncStream {
-    start.flatMap(initial => generate(initial)(s => makeNext(s).map(n => (n, s))).data)
+    start.flatMap(unfoldST(_)(StateT(s => makeNext(s).map(n => (n, s)))).data)
   }
 
   def continually[F[_]: Monad: EmptyKOrElse, T](elem: => T): AsyncStream[F, T] = AsyncStream {
@@ -154,7 +157,7 @@ object AsyncStream {
   }
 
   def continuallyF[F[_]: Monad: EmptyKOrElse, T](elem: => F[T]): AsyncStream[F, T] = AsyncStream {
-    elem.flatMap(first => generate(first)(s => elem.map((_, s))).data)
+    elem.map(_ -> Eval.later(continuallyF(elem)))
   }
 
   def continuallyEval[F[_]: Monad: EmptyKOrElse, T](elem: Eval[T]): AsyncStream[F, T] = AsyncStream {

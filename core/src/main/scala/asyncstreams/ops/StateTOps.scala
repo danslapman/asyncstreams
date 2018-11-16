@@ -37,7 +37,7 @@ class StateTOps[F[_]: Monad: EmptyKOrElse] {
   }
 
   def genS[S, A](start: S)(gen: StateT[F, S, A]): AsyncStream[F, A] =
-    AsyncStream.generate(start)(gen.run)
+    AsyncStream.unfoldST(start)(gen)
 }
 
 object StateTOps {
