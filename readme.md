@@ -16,7 +16,7 @@ val s2 = AsyncStream.unfold[Future, Int](0)(_ + 1)
 val s3 = AsyncStream.unfoldM[Future, Int](0)(i => Future(i + 1))
 
 // Same, but initial value is Future
-val s4 = AsyncStream.AsyncStream.unfoldMM[Future, Int](Future(0))(i => Future(i + 1))
+val s4 = AsyncStream.unfoldMM[Future, Int](Future(0))(i => Future(i + 1))
 
 // Covert iterable into AsyncStream
 val s5 = AsyncStream.fromIterable[Future, Int](List.range(0, 50))
