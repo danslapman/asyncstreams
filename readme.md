@@ -1,7 +1,7 @@
 asyncstreams [ ![Download](https://api.bintray.com/packages/danslapman/maven/asyncstreams/images/download.svg) ](https://bintray.com/danslapman/maven/asyncstreams/_latestVersion)
 ============
 
-asyncstreams is a asynchronous pull-based stream library.
+AsyncStream is a List-like data structure, which is both lazy (like Stream) and asynchronous.
 
 #### Creating AsyncStream
 
