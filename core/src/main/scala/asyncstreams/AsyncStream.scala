@@ -1,25 +1,25 @@
 package asyncstreams
 
 import cats.kernel.Monoid
-import cats.{Applicative, Eval, Monad, ~>}
+import cats.{Applicative, Eval, Monad, MonoidK, ~>}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.semigroup._
-import EmptyKOrElse.ops._
+import cats.syntax.semigroupk._
 import alleycats.Pure
 import cats.data.{State, StateT}
 
 import scala.collection.GenIterable
 import scala.language.higherKinds
 
-class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
-  private val EOS = EmptyKOrElse[F]
+class AsyncStream[F[_]: Monad: MonoidK, A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
+  private val MK = MonoidK[F]
 
   def foldLeft[B](init: B)(f: (B, A) => B): F[B] = {
     def impl(d: F[Step[A, AsyncStream[F, A]]], acc: F[B]): F[B] =
-      d.flatMap(step => impl(step._2.value.data, acc.map(b => f(b, step._1)))).orElse(acc)
+      d.flatMap(step => impl(step._2.value.data, acc.map(b => f(b, step._1)))) <+> acc
 
     impl(data, init.pure[F])
   }
@@ -29,7 +29,7 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
 
   def takeWhile(p: A => Boolean): AsyncStream[F, A] = AsyncStream {
     data.flatMap {
-      case step if !p(step._1) => EOS.empty
+      case step if !p(step._1) => MK.empty
       case step => (step._1 -> step._2.map(_.takeWhile(p))).pure[F]
     }
   }
@@ -49,12 +49,12 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
   def foreach[U](f: A => U): F[Unit] =
     data.flatMap { case (value, rest) =>
       f(value).pure[F] >> rest.value.foreach(f)
-    }.orElse(Applicative[F].unit)
+    } <+> Applicative[F].unit
 
   def foreachF[U](f: A => F[U]): F[Unit] =
     data.flatMap { case (value, rest) =>
       f(value) >> rest.value.foreachF(f)
-    }.orElse(Applicative[F].unit)
+    } <+> Applicative[F].unit
 
   def flatten[B](implicit asIterable: A => GenIterable[B]): AsyncStream[F, B] = {
     def streamChunk(step: Step[A, AsyncStream[F, A]]): AsyncStream[F, B] =
@@ -66,8 +66,8 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
     AsyncStream(data.flatMap(step => streamChunk(step).data))
   }
 
-  def isEmpty: F[Boolean] = data.map(_ => false).orElse(true.pure[F])
-  def nonEmpty: F[Boolean] = data.map(_ => true).orElse(false.pure[F])
+  def isEmpty: F[Boolean] = data.map(_ => false) <+> true.pure[F]
+  def nonEmpty: F[Boolean] = data.map(_ => true) <+> false.pure[F]
 
   def map[B](f: A => B): AsyncStream[F, B] = AsyncStream {
     data.map(s => f(s._1) -> s._2.map(_.map(f)))
@@ -98,7 +98,7 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
     data.flatMap { s =>
       if (p(s._1)) s._1.some.pure[F]
       else s._2.value.find(p)
-    }.orElse(none[A].pure[F])
+    } <+> none[A].pure[F]
   }
 
   def findF(p: A => F[Boolean]): F[Option[A]] = {
@@ -107,7 +107,7 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
         case true => s._1.some.pure[F]
         case false => s._2.value.findF(p)
       }
-    }.orElse(none[A].pure[F])
+    } <+> none[A].pure[F]
   }
 
   def partition(p: A => Boolean): (AsyncStream[F, A], AsyncStream[F, A]) = (filter(p), filter(p.andThen(!_)))
@@ -128,49 +128,49 @@ class AsyncStream[F[_]: Monad: EmptyKOrElse, A](private[asyncstreams] val data: 
 }
 
 object AsyncStream {
-  private[asyncstreams] def apply[F[_]: Monad: EmptyKOrElse, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] =
+  private[asyncstreams] def apply[F[_]: Monad: MonoidK, A](data: => F[Step[A, AsyncStream[F, A]]]): AsyncStream[F, A] =
     new AsyncStream(data)
 
   private[asyncstreams] def evalF[F[_]: Pure]: Eval ~> F = λ[Eval ~> F](e => Pure[F].pure(e.value))
 
-  def empty[F[_]: Monad: EmptyKOrElse, A]: AsyncStream[F, A] = AsyncStream(EmptyKOrElse[F].empty)
+  def empty[F[_]: Monad: MonoidK, A]: AsyncStream[F, A] = AsyncStream(MonoidK[F].empty)
 
-  def fromIterable[F[_]: Monad: EmptyKOrElse, T](it: Iterable[T]): AsyncStream[F, T] = AsyncStream {
-    if (it.nonEmpty) (it.head -> Eval.later(fromIterable(it.tail))).pure[F] else EmptyKOrElse[F].empty
+  def fromIterable[F[_]: Monad: MonoidK, T](it: Iterable[T]): AsyncStream[F, T] = AsyncStream {
+    if (it.nonEmpty) (it.head -> Eval.later(fromIterable(it.tail))).pure[F] else MonoidK[F].empty
   }
 
-  def unfoldS[F[_]: Monad: EmptyKOrElse, S, T](initial: S)(gen: State[S, T]): AsyncStream[F, T] =
+  def unfoldS[F[_]: Monad: MonoidK, S, T](initial: S)(gen: State[S, T]): AsyncStream[F, T] =
     unfoldST(initial)(gen.mapK(evalF))
 
-  def unfoldST[F[_]: Monad: EmptyKOrElse, S, T](initial: S)(gen: StateT[F, S, T]): AsyncStream[F, T] = AsyncStream {
+  def unfoldST[F[_]: Monad: MonoidK, S, T](initial: S)(gen: StateT[F, S, T]): AsyncStream[F, T] = AsyncStream {
     gen.run(initial).map {
       case (s, t) => t -> Eval.later(unfoldST(s)(gen))
     }
   }
 
-  def unfold[F[_]: Monad: EmptyKOrElse, T](start: T)(makeNext: T => T): AsyncStream[F, T] =
+  def unfold[F[_]: Monad: MonoidK, T](start: T)(makeNext: T => T): AsyncStream[F, T] =
     unfoldS(start)(StateT(s => Eval.later((makeNext(s), s))))
 
-  def unfoldM[F[_]: Monad: EmptyKOrElse, T](start: T)(makeNext: T => F[T]): AsyncStream[F, T] =
+  def unfoldM[F[_]: Monad: MonoidK, T](start: T)(makeNext: T => F[T]): AsyncStream[F, T] =
     unfoldST(start)(StateT(s => makeNext(s).map(n => (n, s))))
 
-  def unfoldMM[F[_]: Monad: EmptyKOrElse, T](start: F[T])(makeNext: T => F[T]): AsyncStream[F, T] = AsyncStream {
+  def unfoldMM[F[_]: Monad: MonoidK, T](start: F[T])(makeNext: T => F[T]): AsyncStream[F, T] = AsyncStream {
     start.flatMap(unfoldST(_)(StateT(s => makeNext(s).map(n => (n, s)))).data)
   }
 
-  def continually[F[_]: Monad: EmptyKOrElse, T](elem: => T): AsyncStream[F, T] = AsyncStream {
+  def continually[F[_]: Monad: MonoidK, T](elem: => T): AsyncStream[F, T] = AsyncStream {
     (elem -> Eval.later(AsyncStream.continually(elem))).pure[F]
   }
 
-  def continuallyF[F[_]: Monad: EmptyKOrElse, T](elem: => F[T]): AsyncStream[F, T] = AsyncStream {
+  def continuallyF[F[_]: Monad: MonoidK, T](elem: => F[T]): AsyncStream[F, T] = AsyncStream {
     elem.map(_ -> Eval.later(continuallyF(elem)))
   }
 
-  def continuallyEval[F[_]: Monad: EmptyKOrElse, T](elem: Eval[T]): AsyncStream[F, T] = AsyncStream {
+  def continuallyEval[F[_]: Monad: MonoidK, T](elem: Eval[T]): AsyncStream[F, T] = AsyncStream {
     (elem.value -> Eval.later(AsyncStream.continuallyEval(elem))).pure[F]
   }
 
-  def concat[F[_]: Monad: EmptyKOrElse, A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
-    x.data.map(step => step._1 -> step._2.map(concat(_, y))).orElse(y.data)
+  def concat[F[_]: Monad: MonoidK, A](x: AsyncStream[F, A], y: AsyncStream[F, A]): AsyncStream[F, A] = AsyncStream {
+    x.data.map(step => step._1 -> step._2.map(concat(_, y))) <+> y.data
   }
 }
