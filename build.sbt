@@ -16,7 +16,7 @@ lazy val asyncstreams = (project in file("core"))
       "com.github.mpilquist" %% "simulacrum" % "0.13.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
     ),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
   )
 
 lazy val asyncstreamsRef = LocalProject("asyncstreams")
