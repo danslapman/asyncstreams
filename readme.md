@@ -67,12 +67,12 @@ See more examples in tests.
 asyncstreams is tested to work with:
 - standard scala futures
 - twitter futures
-- any other effect for which EmptyKOrElse can be implemented
+- any other effect for which MonoidK can be implemented
 
 asyncstreams is available via bintray:
 
 ```
     resolvers += Resolver.bintrayRepo("danslapman", "maven")
 
-    libraryDependencies += "danslapman" %% "asyncstreams" % "3.2.0"
+    libraryDependencies += "danslapman" %% "asyncstreams" % "4.0.0"
 ```
