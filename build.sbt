@@ -1,6 +1,7 @@
 val versions = Map(
-  "cats" -> "1.5.0",
-  "twitter" -> "18.7.0"
+  "cats" -> "2.0.0-M4",
+  "twitter" -> "18.7.0",
+  "scalatest" -> "3.0.8"
 )
 
 lazy val asyncstreams = (project in file("core"))
@@ -12,9 +13,9 @@ lazy val asyncstreams = (project in file("core"))
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % versions("cats"),
       "org.typelevel" %% "alleycats-core" % versions("cats"),
-      "org.typelevel" %% "cats-mtl-core" % "0.4.0",
-      "com.github.mpilquist" %% "simulacrum" % "0.13.0",
-      "org.scalatest" %% "scalatest" % "3.0.5" % Test
+      "org.typelevel" %% "cats-mtl-core" % "0.4.0", //NO 2.13 YET
+      "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+      "org.scalatest" %% "scalatest" % versions("scalatest") % Test
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
   )
@@ -30,7 +31,7 @@ lazy val `asyncstreams-twitter` = (project in file("twitter"))
     libraryDependencies ++= Seq(
       "com.twitter" %% "util-core" % versions("twitter"),
       "io.catbird" %% "catbird-util" % versions("twitter") % Test,
-      "org.scalatest" %% "scalatest" % "3.0.5" % Test
+      "org.scalatest" %% "scalatest" % versions("scalatest") % Test
     )
   )
 

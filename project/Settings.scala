@@ -9,8 +9,19 @@ object Settings {
     scalaVersion := "2.12.8",
     crossScalaVersions := Seq("2.11.12", "2.12.8"),
     scalacOptions += "-Ypartial-unification",
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, y)) if y == 13 => Seq("-Ymacro-annotations")
+        case _ => Seq.empty[String]
+      }
+    },
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
+    libraryDependencies ++= ( CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, y)) if y < 13 =>
+        Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full))
+      case _ =>
+        Seq.empty[ModuleID]
+    }),
     licenses += ("WTFPL", url("http://www.wtfpl.net")),
     bintrayOrganization := Some("danslapman"),
     bintrayReleaseOnPublish in ThisBuild := false
