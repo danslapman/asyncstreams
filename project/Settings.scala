@@ -6,13 +6,12 @@ object Settings {
   val common = Seq(
     organization := "danslapman",
     version := "4.0.0",
-    scalaVersion := "2.12.8",
-    crossScalaVersions := Seq("2.11.12", "2.12.8"),
-    scalacOptions += "-Ypartial-unification",
+    scalaVersion := "2.13.0",
+    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0"),
     scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, y)) if y == 13 => Seq("-Ymacro-annotations")
-        case _ => Seq.empty[String]
+        case _ => Seq("-Ypartial-unification")
       }
     },
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),

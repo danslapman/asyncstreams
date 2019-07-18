@@ -11,7 +11,6 @@ import cats.syntax.semigroupk._
 import alleycats.Pure
 import cats.data.{State, StateT}
 
-import scala.collection.GenIterable
 import scala.language.higherKinds
 
 class AsyncStream[F[_]: Monad: MonoidK, A](private[asyncstreams] val data: F[Step[A, AsyncStream[F, A]]]) {
@@ -56,10 +55,10 @@ class AsyncStream[F[_]: Monad: MonoidK, A](private[asyncstreams] val data: F[Ste
       f(value) >> rest.value.foreachF(f)
     } <+> Applicative[F].unit
 
-  def flatten[B](implicit asIterable: A => GenIterable[B]): AsyncStream[F, B] = {
+  def flatten[B](implicit asIterable: A => Iterable[B]): AsyncStream[F, B] = {
     def streamChunk(step: Step[A, AsyncStream[F, A]]): AsyncStream[F, B] =
       AsyncStream.concat(
-        AsyncStream.fromIterable(asIterable(step._1).seq),
+        AsyncStream.fromIterable(asIterable(step._1)),
         step._2.value.flatten
       )
 

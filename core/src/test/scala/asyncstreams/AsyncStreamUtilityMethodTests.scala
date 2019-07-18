@@ -7,8 +7,9 @@ import cats.Eval
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-import scala.collection.JavaConverters._
+import scala.collection.compat._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
 
 class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
@@ -17,19 +18,19 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
   test("unfold") {
     val as = AsyncStream.unfold[Future, Int](0)(_ + 1).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+    as.to(Vector).map(_ shouldBe Vector.range(0, 20))
   }
 
   test("unfoldM") {
     val as: AsyncStream[Future, Int] = AsyncStream.unfoldM(0)(i => Future(i + 1)).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+    as.to(Vector).map(_ shouldBe Vector.range(0, 20))
   }
 
   test("unfoldMM") {
     val as: AsyncStream[Future, Int] = AsyncStream.unfoldMM(Future(0))(i => Future(i + 1)).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+    as.to(Vector).map(_ shouldBe Vector.range(0, 20))
   }
 
   test("unfoldM with foreach") {
@@ -81,7 +82,7 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
 
     val as = AsyncStream.continually(i.getAndIncrement()).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+    as.to(Vector).map(_ shouldBe Vector.range(0, 20))
   }
 
   test("continuallyF") {
@@ -91,7 +92,7 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
 
     val as = AsyncStream.continuallyF(next).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+    as.to(Vector).map(_ shouldBe Vector.range(0, 20))
   }
 
   test("continuallyEval later") {
@@ -99,7 +100,7 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
 
     val as = AsyncStream.continuallyEval(Eval.later(i.getAndIncrement())).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.fill(20)(0))
+    as.to(Vector).map(_ shouldBe Vector.fill(20)(0))
   }
 
   test("continuallyEval always") {
@@ -107,6 +108,6 @@ class AsyncStreamUtilityMethodTests extends AsyncFunSuite with Matchers with Tes
 
     val as = AsyncStream.continuallyEval(Eval.always(i.getAndIncrement())).take(20)
 
-    as.to[Vector].map(_ shouldBe Vector.range(0, 20))
+    as.to(Vector).map(_ shouldBe Vector.range(0, 20))
   }
 }
