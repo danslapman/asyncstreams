@@ -22,9 +22,8 @@ lazy val asyncstreams = (project in file("core"))
 
 lazy val asyncstreamsRef = LocalProject("asyncstreams")
 
-/*
 lazy val `asyncstreams-twitter` = (project in file("twitter"))
-  .dependsOn(asyncstreamsRef % "test->test;compile->compile")
+  .dependsOn(asyncstreamsRef)
   .settings(Settings.common)
   .settings(
     name := "asyncstreams-twitter",
@@ -37,11 +36,10 @@ lazy val `asyncstreams-twitter` = (project in file("twitter"))
       "org.scalatest" %% "scalatest" % versions("scalatest") % Test
     )
   )
-*/
 
 lazy val root = (project in file("."))
-  .dependsOn(asyncstreams) //, `asyncstreams-twitter`)
-  .aggregate(asyncstreams) //, `asyncstreams-twitter`)
+  .dependsOn(asyncstreams, `asyncstreams-twitter`)
+  .aggregate(asyncstreams, `asyncstreams-twitter`)
   .settings(
     publish := {},
     bintrayRelease := {},
