@@ -8,7 +8,8 @@ import com.twitter.util.{Await, Future}
 import io.catbird.util.FutureInstances
 import org.scalatest.{FunSuite, Matchers}
 
-import scala.collection.JavaConverters._
+import scala.collection.compat._
+import scala.jdk.CollectionConverters._
 
 class AsyncStreamTwitterTests extends FunSuite with Matchers with FutureInstances with TestHelpers {
   private def wait[T](f: Future[T]): T = Await.result(f)
@@ -16,7 +17,7 @@ class AsyncStreamTwitterTests extends FunSuite with Matchers with FutureInstance
 
   test("composition operator") {
     val s = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
-    wait(s.to[List]) shouldBe List(1, 2, 3)
+    wait(s.to(List)) shouldBe List(1, 2, 3)
   }
 
   test("foldLeft") {
@@ -29,7 +30,7 @@ class AsyncStreamTwitterTests extends FunSuite with Matchers with FutureInstance
     val s1 = List(0, 1).toAS[Future]
     val s2 = List(2, 3).toAS[Future]
     val f = s1 ++ s2
-    wait(f.to[List]) shouldBe List(0, 1, 2, 3)
+    wait(f.to(List)) shouldBe List(0, 1, 2, 3)
   }
 
   test("working as monad") {
@@ -41,22 +42,22 @@ class AsyncStreamTwitterTests extends FunSuite with Matchers with FutureInstance
       v2 <- s2
     } yield v1 * v2
 
-    wait(res.to[List]) shouldBe List(0, 0, 2, 3)
+    wait(res.to(List)) shouldBe List(0, 0, 2, 3)
   }
 
   test("takeWhile") {
     val r = makeInfStream.takeWhile(_ < 4)
-    wait(r.to[List]) shouldBe List(0, 1, 2, 3)
+    wait(r.to(List)) shouldBe List(0, 1, 2, 3)
   }
 
   test("take") {
     val r = makeInfStream.take(3)
-    wait(r.to[List]) shouldBe List(0, 1, 2)
+    wait(r.to(List)) shouldBe List(0, 1, 2)
   }
 
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
-    wait(r.to[List]) shouldBe (0 to 999999)
+    wait(r.to(List)) shouldBe (0 to 999999)
   }
 
   test("foreach") {
@@ -76,8 +77,8 @@ class AsyncStreamTwitterTests extends FunSuite with Matchers with FutureInstance
   }
 
   test("flatten") {
-    val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS[Future]
+    val stream = Vector.range(0, 1000000).grouped(10).to(Vector).toAS[Future]
     val flatStream = stream.flatten
-    wait(flatStream.to[Vector]) shouldBe Vector.range(0, 1000000)
+    wait(flatStream.to(Vector)) shouldBe Vector.range(0, 1000000)
   }
 }

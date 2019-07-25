@@ -10,6 +10,7 @@ import cats.mtl.instances.state._
 import cats.syntax.functorFilter._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
+import scala.collection.compat._
 import scala.concurrent.{ExecutionContext, Future}
 
 class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers with TestHelpers {
@@ -63,7 +64,7 @@ class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers with TestH
       } yield s
     } take 3
 
-    stream.to[List].map(_ shouldBe (0 :: 1 :: 2 :: Nil))
+    stream.to(List).map(_ shouldBe (0 :: 1 :: 2 :: Nil))
   }
 
   test("Generate finite stream") {
@@ -77,6 +78,6 @@ class AsyncStreamMonadSyntaxTests extends AsyncFunSuite with Matchers with TestH
       } yield s
     }
 
-    stream.to[List].map(_ shouldBe (0 :: 1 :: 2 :: Nil))
+    stream.to(List).map(_ shouldBe (0 :: 1 :: 2 :: Nil))
   }
 }

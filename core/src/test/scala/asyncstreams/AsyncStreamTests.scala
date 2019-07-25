@@ -5,10 +5,10 @@ import java.util.concurrent.{CopyOnWriteArrayList, Executors}
 import cats.instances.future._
 import org.scalatest.{AsyncFunSuite, Matchers}
 
+import scala.collection.compat._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
   override implicit def executionContext: ExecutionContext =
@@ -19,7 +19,7 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
 
   test("composition operator") {
     val s = 1 ~:: 2 ~:: 3 ~:: ANil[Future, Int]
-    s.to[List].map(_ shouldBe List(1, 2, 3))
+    s.to(List).map(_ shouldBe List(1, 2, 3))
   }
 
   test("foldLeft") {
@@ -32,7 +32,7 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
     val s1 = List(0, 1).toAS[Future]
     val s2 = List(2, 3).toAS[Future]
     val f = s1 ++ s2
-    f.to[List].map(_ shouldBe List(0, 1, 2, 3))
+    f.to(List).map(_ shouldBe List(0, 1, 2, 3))
   }
 
   test("concatenating large streams should not crash") {
@@ -50,22 +50,22 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
       v2 <- s2
     } yield v1 * v2
 
-    res.to[List].map(_ shouldBe List(0, 0, 2, 3))
+    res.to(List).map(_ shouldBe List(0, 0, 2, 3))
   }
 
   test("takeWhile") {
     val r = makeInfStream.takeWhile(_ < 4)
-    r.to[List].map(_ shouldBe List(0, 1, 2, 3))
+    r.to(List).map(_ shouldBe List(0, 1, 2, 3))
   }
 
   test("take") {
     val r = makeInfStream.take(3)
-    r.to[List].map(_ shouldBe List(0, 1, 2))
+    r.to(List).map(_ shouldBe List(0, 1, 2))
   }
 
   test("folding large stream should not crash") {
     val r = makeInfStream.takeWhile(_ < 1000000)
-    r.to[List].map(_ shouldBe (0 to 999999))
+    r.to(List).map(_ shouldBe (0 to 999999))
   }
 
   test("foreach") {
@@ -85,8 +85,8 @@ class AsyncStreamTests extends AsyncFunSuite with Matchers with TestHelpers {
   }
 
   test("flatten") {
-    val stream = Vector.range(0, 1000000).grouped(10).to[Vector].toAS[Future]
+    val stream = Vector.range(0, 1000000).grouped(10).to(Vector).toAS[Future]
     val flatStream = stream.flatten
-    flatStream.to[Vector].map(_ shouldBe Vector.range(0, 1000000))
+    flatStream.to(Vector).map(_ shouldBe Vector.range(0, 1000000))
   }
 }
