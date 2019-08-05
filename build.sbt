@@ -1,5 +1,5 @@
 val versions = Map(
-  "cats" -> "2.0.0-M4",
+  "cats" -> "2.0.0-RC1",
   "twitter" -> "19.6.0",
   "scalatest" -> "3.0.8"
 )
