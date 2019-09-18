@@ -5,9 +5,9 @@ import sbt.Keys._
 object Settings {
   val common = Seq(
     organization := "danslapman",
-    version := "5.0.0-m1",
-    scalaVersion := "2.13.0",
-    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0"),
+    version := "5.0.0",
+    scalaVersion := "2.13.1",
+    crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.1"),
     scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, y)) if y == 13 => Seq("-Ymacro-annotations")
