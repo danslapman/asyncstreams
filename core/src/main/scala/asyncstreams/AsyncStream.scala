@@ -76,6 +76,10 @@ class AsyncStream[F[_]: Monad: MonoidK, A](private[asyncstreams] val data: F[Ste
     data.flatMap(s => f(s._1).map(nv => nv -> s._2.map(_.mapF(f))))
   }
 
+  def mapK[G[_]: Monad: MonoidK](fk: F ~> G): AsyncStream[G, A] = AsyncStream {
+    fk.apply(data.map { case (a, eval) => a -> eval.map(_.mapK(fk))})
+  }
+
   def flatMap[B](f: A => AsyncStream[F, B]): AsyncStream[F, B] = AsyncStream {
     for {
       (head, tail) <- data
